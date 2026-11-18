@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모두의 자리, 이키가이 지도</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#171A2B">
+<script>document.documentElement.classList.add('boot'); setTimeout(function () { document.documentElement.classList.remove('boot'); }, 2500);</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@200..700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --night:#171A2B; --panel:#1C2034; --stage:#232842; --line:#2E3249;
+  --text:#F1ECE4; --soft:#D7D4DF; --muted:#A9A8BA; --faint:#8A8CA3;
+  --serif:"Hahmlet","Noto Serif KR","AppleMyungjo","Batang",serif;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --pad:clamp(14px,2.2vw,32px);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+html{background:var(--night);color:var(--text)}
+body{margin:0;font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;word-break:keep-all;display:flex;flex-direction:column}
+html.boot body{visibility:hidden}
+[hidden]{display:none!important}
+button,select,input{font:inherit;color:inherit}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:-1px}
+
+.top{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;padding:14px var(--pad) 10px}
+.top h1{font:500 clamp(20px,2vw,26px)/1.2 var(--serif);margin:0;letter-spacing:-.01em}
+.top .ev{color:var(--muted);font-size:15px}
+.count{margin-left:auto;font:600 clamp(16px,1.5vw,20px)/1 var(--sans);font-variant-numeric:tabular-nums}
+.status{display:flex;align-items:center;gap:7px;color:var(--faint);font-size:13px}
+.status i{width:8px;height:8px;border-radius:50%;background:#0ca30c;box-shadow:0 0 8px #0ca30c}
+.status.bad i{background:#fab219;box-shadow:0 0 8px #fab219}
+.btn{appearance:none;border:0;border-radius:999px;padding:8px 15px;font:600 14px/1.1 var(--sans);cursor:pointer;background:transparent;color:var(--text);
+  box-shadow:inset 0 0 0 1.5px var(--line);white-space:nowrap}
+.btn:hover{box-shadow:inset 0 0 0 1.5px var(--muted)}
+.btn[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--text)}
+.btn.primary{background:var(--text);color:var(--night);box-shadow:none}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+select{appearance:none;background:var(--stage);border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
+
+.stage{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 15rem;gap:var(--pad);padding:0 var(--pad) var(--pad)}
+.mapbox{position:relative;min-height:0;min-width:0}
+.mapbox .map{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.map text{pointer-events:none}
+.dot{cursor:pointer;transition:opacity .3s}
+.dot .ring{opacity:0;transition:opacity .15s}
+.dot:hover .ring{opacity:.55}
+.dot.me .ring{opacity:.75}
+.dot:focus{outline:none}
+.dot.sel .ring,.dot:focus-visible .ring{opacity:1;stroke-width:3}
+.dot.fresh .ring{transform-box:fill-box;transform-origin:50% 50%;animation:ring 1.8s ease-out 4}
+@keyframes ring{0%{opacity:.95;transform:scale(.55)}100%{opacity:0;transform:scale(2.1)}}
+.empty{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;max-width:22em;text-align:center;color:var(--soft);
+  background:rgba(23,26,43,.86);border-radius:14px;padding:14px 18px}
+
+.latest{align-self:start;margin-top:6px}
+.latest h2{font:500 16px/1.3 var(--serif);margin:0 0 12px;color:var(--soft)}
+.latest ol{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.latest li{display:grid;gap:1px}
+.latest b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.latest span{color:var(--muted);font-size:13.5px}
+@media (max-width:1100px){.stage{grid-template-columns:minmax(0,1fr)}.latest{display:none}}
+@media (max-width:640px){.status{display:none}.top .ev{display:none}}
+
+.tip{position:fixed;z-index:60;pointer-events:none;background:#262B45;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:260px}
+.tip strong{display:block;font-size:15px;font-weight:600}
+.tip .k{color:var(--muted)}
+.tip .row{display:flex;align-items:center;gap:8px}
+.tip .key{width:12px;height:2px;border-radius:2px;background:var(--c)}
+
+.card{position:fixed;z-index:50;right:var(--pad);bottom:var(--pad);width:min(330px,calc(100vw - 2 * var(--pad)));background:#20253D;
+  border-radius:16px;padding:16px 18px 18px;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.card h2{font:600 20px/1.25 var(--serif);margin:0 44px 6px 0;overflow-wrap:anywhere}
+.card .shape{margin:0;font-weight:600}
+.card .tag{margin:2px 0 0;color:var(--soft);font-size:14px}
+.card .size{margin:6px 0 14px;color:var(--muted);font-size:14px}
+.card .bars{display:grid;gap:10px}
+.card .bar{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;font-size:14px}
+.card .nm{display:flex;align-items:center;gap:8px}
+.card .lamp{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
+.card .val{font-weight:600;font-variant-numeric:tabular-nums}
+.card .track{grid-column:1/-1;position:relative;height:6px;border-radius:99px;background:rgba(241,236,228,.08)}
+.card .fill{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--c)}
+.card .bar.off .fill{opacity:.42}
+.card .bar.off .nm,.card .bar.off .val{color:var(--muted)}
+.card .x{position:absolute;top:10px;right:10px;width:36px;height:36px;padding:0;display:grid;place-items:center;font-size:19px;line-height:1}
+@media (max-width:640px){.card{left:0;right:0;bottom:0;width:auto;border-radius:18px 18px 0 0;padding-bottom:max(18px,env(safe-area-inset-bottom))}}
+.login{max-width:420px;margin:12vh auto;padding:0 var(--pad)}
+.login .private{margin:0 0 22px;padding:12px 14px;border-radius:12px;background:rgba(241,236,228,.06);color:var(--soft);line-height:1.5}
+.login h1{font:500 26px/1.3 var(--serif);margin:0 0 10px}
+.login p{color:var(--muted)}
+.login form{display:flex;gap:10px;margin-top:18px}
+.login input{flex:1;min-width:0;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text)}
+.lang-corner{position:fixed;top:14px;right:var(--pad);z-index:30}
+@media (prefers-reduced-motion:reduce){.dot.fresh .ring{animation:none}}
+</style>
+</head>
+<body>
+
+<section class="login" id="login" hidden>
+  <button class="btn lang-corner" type="button" data-lang-btn></button>
+  <p class="private" id="loginPrivate" hidden data-t="loginPrivate">진행자가 이 지도를 참여자에게 공개하지 않았어요. 진행자라면 아래에 관리자 키를 넣어 주세요.</p>
+  <h1 data-t="loginTitle">관리자 키를 넣어 주세요</h1>
+  <p id="loginHelp" data-t="loginHelp">대시보드에 들어갈 때 쓰는 키예요.</p>
+  <form id="loginForm"><input id="keyInput" type="password" autocomplete="off" aria-label="관리자 키" placeholder="관리자 키" data-ta="keyAria" data-tp="keyAria"><button class="btn primary" type="submit" data-t="open">열기</button></form>
+  <p id="loginMsg" hidden data-t="loginMsg">키가 맞지 않아요. 다시 확인해 주세요.</p>
+  <p id="loginErr" hidden></p>
+</section>
+
+<header class="top" id="top" hidden>
+  <h1 data-t="h1">모두의 자리</h1>
+  <span class="ev" id="ev"></span>
+  <span class="count" id="count" aria-live="polite"></span>
+  <label id="groupBox" hidden><span class="sr" data-t="groupAria">그룹</span><select id="group"><option value="" data-t="allGroups">전체 그룹</option></select></label>
+  <button class="btn" id="namesBtn" type="button" aria-pressed="true" data-t="names">닉네임 보이기</button>
+  <span class="status" id="status"><i></i><span id="statusText" data-t="loading">불러오는 중</span></span>
+  <button class="btn" type="button" data-lang-btn></button>
+</header>
+
+<main class="stage" id="stage" hidden>
+  <div class="mapbox">
+    <div id="map"></div>
+    <p class="empty" id="empty" hidden data-t="empty">아직 응답이 없어요. 참여자가 결과를 보내면 여기에 점으로 나타나요.</p>
+  </div>
+  <aside class="latest" aria-labelledby="latestTitle">
+    <h2 id="latestTitle" data-t="latest">방금 들어온 사람</h2>
+    <ol id="latestList"></ol>
+  </aside>
+  <ul class="sr" id="srList"></ul>
+</main>
+
+<aside class="card" id="card" hidden aria-labelledby="cardName">
+  <button class="btn x" id="cardClose" type="button" aria-label="닫기" data-ta="close">×</button>
+  <h2 id="cardName"></h2>
+  <p class="shape" id="cardShape"></p>
+  <p class="tag" id="cardTag"></p>
+  <p class="size" id="cardSize"></p>
+  <div class="bars" id="cardBars"></div>
+</aside>
+
+<div class="tip" id="tip" hidden></div>
+
+<script>window.addEventListener('error', function (e) { if (/config\.js/.test(e.filename || '')) window.IKIGAI_CONFIG_ERROR = 'syntax'; }, true);</script>
+<script>document.write('<script src="config.js' + (/^http/.test(location.protocol) ? '?v=' + Date.now() : '') + '" onerror="window.IKIGAI_CONFIG_ERROR=\'missing\'"><\/script>');</script>
+<script src="core.js"></script>
+<script>
+(() => {
+'use strict';
+const I = window.Ikigai, { EL, TYPES, pct } = I;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const LG = I.LANG;
+const pickText = v => (v && typeof v === 'object' && !Array.isArray(v)) ? (v[LG] || v.ko || v.en || '') : (v || '');
+
+/* ---------------- words ---------------- */
+const STR = {
+  ko: {
+    title:'모두의 자리, 이키가이 지도', langAria:'View in English',
+    count:n => `${n}명`, mapAria:n => `${n}명의 자리를 찍은 이키가이 지도. 같은 내용이 아래 목록에 있어요.`,
+    statusRetry:'연결이 끊겼어요. 다시 시도하는 중', statusSheet:'방금 시트에서 갱신', statusLive:'실시간으로 갱신 중', statusAgo:s => `${s}초 전 갱신`,
+    sizeIs:p => `이키가이 크기 ${p}%`, noNick:'닉네임 없음', you:'나',
+    ago:s => s < 60 ? '방금' : s < 3600 ? `${Math.floor(s / 60)}분 전` : `${Math.floor(s / 3600)}시간 전`,
+    loginHelpSheet:'Google Apps Script(Code.gs) 맨 위에 정한 ADMIN_KEY를 넣어 주세요. 대시보드와 같은 키예요.',
+    cfgMissing:'config.js 파일을 찾지 못했어요. map.html과 같은 폴더에 config.js를 올렸는지 확인해 주세요.',
+    cfgSyntax:'config.js를 읽지 못했어요. 주소를 작은따옴표(\')로 감쌌는지, 줄 끝 쉼표(,)가 빠지지 않았는지 확인해 주세요.',
+    collectorDown:'수집기에 연결하지 못했어요. Apps Script 배포 설정이 ‘실행: 나’, ‘액세스: 모든 사용자’인지 확인해 주세요.',
+    serverDown:'서버에 연결하지 못했어요. server.py로 연 주소인지, 또는 config.js에 collectUrl이 들어 있는지 확인해 주세요.',
+    sheetReadFail:'시트에서 응답을 읽지 못했어요.',
+  },
+  en: {
+    title:'Where everyone stands, Ikigai Map', langAria:'한국어로 보기',
+    count:n => `${n} ${n === 1 ? 'person' : 'people'}`, mapAria:n => `Ikigai map with ${n} people on it. The same list is below.`,
+    statusRetry:'Connection lost. Retrying', statusSheet:'Just updated from the sheet', statusLive:'Updating live', statusAgo:s => `Updated ${s}s ago`,
+    sizeIs:p => `Ikigai size ${p}%`, noNick:'No nickname', you:'you',
+    ago:s => s < 60 ? 'just now' : s < 3600 ? `${Math.floor(s / 60)} min ago` : `${Math.floor(s / 3600)} h ago`,
+    loginHelpSheet:'Enter the ADMIN_KEY set at the top of the Google Apps Script (Code.gs). It\'s the same key as the dashboard.',
+    cfgMissing:'config.js wasn\'t found. Check that config.js is in the same folder as map.html.',
+    cfgSyntax:'config.js couldn\'t be read. Check that the address is wrapped in single quotes (\') and that no comma (,) is missing at the end of a line.',
+    collectorDown:'Couldn\'t reach the collector. Check that the Apps Script deployment is set to Execute as: Me and Who has access: Anyone.',
+    serverDown:'Couldn\'t reach the server. Check that this page was opened from server.py, or that config.js has a collectUrl.',
+    sheetReadFail:'Couldn\'t read responses from the sheet.',
+  },
+};
+const S = STR[LG];
+const STATIC_EN = {
+  loginTitle:'Enter the admin key', loginHelp:'It\'s the key you use for the dashboard.', keyAria:'Admin key', open:'Open',
+  loginMsg:'That key doesn\'t match. Please check it and try again.',
+  loginPrivate:'The organizer hasn\'t opened this map to participants. If you\'re the organizer, enter the admin key below.',
+  h1:'Where everyone stands', groupAria:'Group', allGroups:'All groups', names:'Show nicknames', loading:'Loading',
+  empty:'No responses yet. Each result that\'s sent shows up here as a dot.', latest:'Just joined', close:'Close',
+};
+(function applyStatic() {
+  document.title = S.title;
+  $$('[data-lang-btn]').forEach(b => {
+    b.textContent = I.OTHER_LANG.label; b.lang = I.OTHER_LANG.code; b.setAttribute('aria-label', S.langAria);
+    b.addEventListener('click', () => I.setLang(I.OTHER_LANG.code));
+  });
+  if (LG !== 'en') return;
+  $$('[data-t]').forEach(el => { const v = STATIC_EN[el.dataset.t]; if (v != null) el.textContent = v; });
+  $$('[data-ta]').forEach(el => { const v = STATIC_EN[el.dataset.ta]; if (v != null) el.setAttribute('aria-label', v); });
+  $$('[data-tp]').forEach(el => { const v = STATIC_EN[el.dataset.tp]; if (v != null) el.placeholder = v; });
+})();
+
+/* ---------------- key: the dashboard's; it arrives after # (never sent to a server) or as ?key= ---------------- */
+let KEY = '';
+try {
+  const h = new URLSearchParams(location.hash.slice(1)), q = new URLSearchParams(location.search), k = h.get('key') || q.get('key');
+  if (k) { sessionStorage.setItem('ikigai-admin-key', k); q.delete('key'); history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '')); }
+  KEY = k || sessionStorage.getItem('ikigai-admin-key') || '';
+} catch (e) {}
+$('#loginForm').addEventListener('submit', e => {
+  e.preventDefault(); KEY = $('#keyInput').value.trim(); MODE = 'admin'; WAIT_KEY = false;
+  try { sessionStorage.setItem('ikigai-admin-key', KEY); } catch (_) {}
+  load(true);
+});
+
+/* ---------------- data (same sources as the dashboard) ---------------- */
+const CFG = Object.assign({ collectUrl:'', title:'', groups:[] }, window.IKIGAI_CONFIG || {});
+const SHEET = !!CFG.collectUrl;
+if (SHEET) $('#loginHelp').textContent = S.loginHelpSheet;
+const CFG_PROBLEM = !window.IKIGAI_CONFIG ? (window.IKIGAI_CONFIG_ERROR === 'missing' ? S.cfgMissing : S.cfgSyntax) : '';
+async function fetchData() {
+  if (SHEET) {
+    const r = await fetch(CFG.collectUrl + (CFG.collectUrl.includes('?') ? '&' : '?') + 'action=data&key=' + encodeURIComponent(KEY), { cache:'no-store', redirect:'follow' });
+    const j = await r.json();
+    if (!j.ok && j.error === 'forbidden') return { denied:true };
+    if (!j.ok) return { error:j.error || S.sheetReadFail };
+    j.info = { title:CFG.title, groups:CFG.groups || [] };
+    return { json:j };
+  }
+  const r = await fetch('api/admin/data', { headers:{ 'X-Admin-Key':KEY }, cache:'no-store' });
+  if (r.status === 403) return { denied:true };
+  const j = await r.json(); if (!j.ok) throw new Error(j.error);
+  return { json:j };
+}
+async function fetchPublic() {
+  const r = await fetch(SHEET ? CFG.collectUrl + (CFG.collectUrl.includes('?') ? '&' : '?') + 'action=people' : 'api/people', { cache:'no-store', redirect:'follow' });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ok || !Array.isArray(j.people)) return { private:true };   // turned off, or a collector without the shared map yet
+  let info = { title:CFG.title, groups:CFG.groups || [] };
+  if (!SHEET && !INFO) { try { const c = await (await fetch('api/config', { cache:'no-store' })).json(); info = { title:c.title, groups:c.groups || [] }; } catch (e) {} }
+  return { json:{ rows:j.people, info } };
+}
+let MODE = KEY ? 'admin' : 'public';
+let RAW = [], INFO = null, sig = '', failures = 0, lastOk = 0, seen = null, GROUP = '', NAMES = true, SEL = null, WAIT_KEY = false;
+const fresh = new Set();
+try { const v = localStorage.getItem('ikigai-map:names'); NAMES = v ? v !== 'off' : innerWidth >= 700; } catch (e) {}
+// this browser's own latest response, to mark "me" (read again on every update, so a re-send moves the dot)
+const readMe = () => { try { const o = JSON.parse(localStorage.getItem('ikigai-map:v2') || 'null'); return o && o.sub || null; } catch (e) { return null; } };
+let ME = readMe();
+async function load(first) {
+  try {
+    const got = MODE === 'admin' ? await fetchData() : await fetchPublic();
+    if (got.private) { MODE = 'admin'; WAIT_KEY = true; showLogin(); $('#loginPrivate').hidden = false; $('#loginMsg').hidden = true; $('#loginErr').hidden = true; return; }
+    if (got.denied) { WAIT_KEY = true; showLogin(); $('#loginMsg').hidden = !KEY; $('#loginErr').hidden = true; return; }
+    if (got.error) { showLogin(); $('#loginMsg').hidden = true; $('#loginErr').textContent = got.error; $('#loginErr').hidden = false; return; }
+    const j = got.json;
+    $('#login').hidden = true; $('#top').hidden = false; $('#stage').hidden = false;
+    if (!INFO) setupInfo(j.info);
+    failures = 0; lastOk = Date.now();
+    const me = readMe(), s = j.rows.length + ':' + (j.rows.length ? j.rows[j.rows.length - 1].id : 0) + ':' + me;
+    if (s !== sig || first) {
+      ME = me;
+      sig = s;
+      const ids = new Set(j.rows.map(r => r.id));
+      if (seen) { for (const id of ids) if (!seen.has(id)) fresh.add(id); setTimeout(() => fresh.clear(), 8000); }
+      seen = ids;
+      RAW = j.rows.map(r => Object.assign({ id:r.id, t:new Date(r.t), c:r.c || 'p' + r.id, g:r.g || '', n:r.n || '' }, r.a ? I.analyze(r.a) : I.analyzeScores(r.s)));
+      render();
+    }
+  } catch (e) {
+    failures++;
+    if (!INFO) { showLogin(); $('#loginMsg').hidden = true; $('#loginErr').textContent = CFG_PROBLEM || (SHEET ? S.collectorDown : S.serverDown); $('#loginErr').hidden = false; }
+  }
+  paintStatus();
+}
+function showLogin() { $('#login').hidden = false; $('#top').hidden = true; $('#stage').hidden = true; }
+function setupInfo(info) {
+  INFO = info || { title:'', groups:[] };
+  $('#ev').textContent = pickText(INFO.title);
+  if (INFO.groups && INFO.groups.length) {
+    INFO.groups.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; $('#group').appendChild(o); });
+    $('#groupBox').hidden = false;
+  }
+}
+function paintStatus() {
+  const box = $('#status'), t = $('#statusText');
+  if (failures > 0) { box.classList.add('bad'); t.textContent = S.statusRetry; return; }
+  box.classList.remove('bad');
+  const s = Math.round((Date.now() - lastOk) / 1000);
+  t.textContent = s < 3 ? (SHEET ? S.statusSheet : S.statusLive) : S.statusAgo(s);
+}
+// every open map asks the collector again: less often for the shared view on Apps Script, and not at all while the tab is hidden or waiting for a key
+const every = () => SHEET ? (MODE === 'admin' ? 10000 : 15000) : 5000;
+let busy = false;
+async function poll() { if (busy || WAIT_KEY || document.hidden) return; busy = true; try { await load(false); } finally { busy = false; } }
+(function tick() { setTimeout(async () => { await poll(); tick(); }, every()); })();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastOk > 3000) poll(); });
+setInterval(paintStatus, 1000);
+
+/* ---------------- the map ---------------- */
+const tip = $('#tip');
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 10, x + 14) + 'px';
+  tip.style.top = Math.max(10, Math.min(window.innerHeight - h - 10, y + 14)) + 'px';
+}
+const hideTip = () => { tip.hidden = true; };
+function people() {
+  const m = new Map(); for (const r of RAW) m.set(r.c, r);   // each person's latest response
+  let rows = Array.from(m.values()).sort((a, b) => a.id - b.id);
+  if (GROUP) rows = rows.filter(r => r.g === GROUP);
+  return rows;
+}
+const who = r => (r.n || S.noNick) + (r.id === ME ? ` (${S.you})` : '');
+// hover: just the nickname
+const nickTip = r => `<strong>${esc(r.n || S.noNick)}</strong>${r.id === ME ? `<div class="k">${S.you}</div>` : ''}`;
+// click or tap: the scores
+function openCard(r, viaKey) {
+  SEL = r.id; hideTip();
+  $('#cardName').textContent = who(r);
+  $('#cardShape').textContent = (r.shape ? r.word + ' ' : '') + TYPES[r.shape].name;
+  $('#cardTag').textContent = TYPES[r.shape].tag;
+  $('#cardSize').textContent = S.sizeIs(pct(r.core));
+  $('#cardBars').innerHTML = EL.map(e => `<div class="bar ${r.shape & e.bit ? 'on' : 'off'}"><span class="nm"><span class="lamp" style="--c:${e.light}"></span>${e.name}</span>
+    <span class="val">${pct(r.s[e.k])}%</span><span class="track"><span class="fill" style="--c:${e.light};width:${pct(r.s[e.k])}%"></span></span></div>`).join('');
+  $('#card').hidden = false;
+  markSel();
+  if (viaKey) $('#cardClose').focus();
+}
+function closeCard() {
+  const back = SEL != null && $(`#map .dot.sel`);
+  SEL = null; $('#card').hidden = true; markSel();
+  if (back && document.activeElement === $('#cardClose')) back.focus();
+}
+function markSel() {
+  const rows = people(), i = rows.findIndex(r => r.id === SEL);
+  $$('#map .dot').forEach(d => d.classList.toggle('sel', +d.dataset.i === i));
+  if (SEL != null && i < 0) { SEL = null; $('#card').hidden = true; }
+}
+$('#cardClose').addEventListener('click', closeCard);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#card').hidden) closeCard(); });
+function render() {
+  const rows = people();
+  const pts = I.crowdLayout(rows.map(r => ({ s:r.s, shape:r.shape, r:r.id === ME ? 13 : 0 })));
+  const labs = NAMES ? I.crowdLabels(pts, rows.map(r => r.n), 11) : pts.map(() => null);
+  $('#map').innerHTML = I.buildMap('all', { focusable:true, crowd:pts.map((p, i) => ({ x:p.x, y:p.y, r:p.r, m:rows[i].shape, label:rows[i].n, lab:labs[i],
+    fresh:fresh.has(rows[i].id), me:rows[i].id === ME, aria:`${who(rows[i])}: ${TYPES[rows[i].shape].name}` })) });
+  const svg = $('#map svg'); svg.setAttribute('aria-label', S.mapAria(rows.length));
+  svg.setAttribute('preserveAspectRatio', innerWidth < innerHeight ? 'xMidYMin meet' : 'xMidYMid meet');   // tall screens: map at the top
+  $$('.dot', svg).forEach(d => {
+    const r = rows[+d.dataset.i];
+    const tipAt = ev => { if (ev.pointerType === 'mouse') showTip(nickTip(r), ev.clientX, ev.clientY); };
+    d.addEventListener('pointerenter', tipAt);
+    d.addEventListener('pointermove', tipAt);
+    d.addEventListener('pointerleave', hideTip);
+    d.addEventListener('click', () => openCard(r, false));
+    d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(r, true); } });
+    d.addEventListener('focus', () => { const b = d.getBoundingClientRect(); showTip(nickTip(r), b.right, b.top); });
+    d.addEventListener('blur', hideTip);
+  });
+  // dots are small on a phone: a tap near one picks the nearest; a tap on empty map closes the card
+  svg.addEventListener('click', ev => {
+    if (ev.target.closest('.dot')) return;
+    const m = svg.getScreenCTM(); if (!m) return;
+    const q = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(m.inverse());
+    let best = -1, bd = Infinity;
+    pts.forEach((t, i) => { const d = Math.hypot(t.x - q.x, t.y - q.y) - t.r; if (d < bd) { bd = d; best = i; } });
+    if (best >= 0 && bd * Math.hypot(m.a, m.b) <= 18) openCard(rows[best], false);
+    else if (!$('#card').hidden) closeCard();
+  });
+  markSel();
+  $('#count').textContent = S.count(rows.length);
+  $('#empty').hidden = rows.length > 0;
+  const now = Date.now();
+  $('#latestList').innerHTML = rows.slice().sort((a, b) => b.id - a.id).slice(0, 8).map(r =>
+    `<li><b>${esc(r.n || S.noNick)}</b><span>${esc(TYPES[r.shape].name)}, ${S.ago(Math.max(0, (now - r.t.getTime()) / 1000))}</span></li>`).join('');
+  $('#srList').innerHTML = rows.map(r => `<li>${esc(r.n || S.noNick)}: ${esc(TYPES[r.shape].name)}, ${S.sizeIs(pct(r.core))}</li>`).join('');
+}
+$('#namesBtn').setAttribute('aria-pressed', String(NAMES));
+$('#namesBtn').addEventListener('click', () => {
+  NAMES = !NAMES; $('#namesBtn').setAttribute('aria-pressed', String(NAMES));
+  try { localStorage.setItem('ikigai-map:names', NAMES ? 'on' : 'off'); } catch (e) {}
+  render();
+});
+$('#group').addEventListener('change', e => { GROUP = e.target.value; render(); });
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (RAW.length) render(); }, 200); });
+
+load(true);
+document.documentElement.classList.remove('boot');
+})();
+</script>
+</body>
+</html>

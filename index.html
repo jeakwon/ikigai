@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이키가이 지도</title>
+<meta name="description" content="32개의 문장에 답하고, 네 빛이 겹치는 지도 위에서 지금 내 자리와 이키가이의 크기를 확인해 보세요.">
+<meta name="theme-color" content="#171A2B">
+<script>document.documentElement.classList.add('boot'); setTimeout(function () { document.documentElement.classList.remove('boot'); }, 2500);</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@200..700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --night:#171A2B; --stage:#1E2237; --line:#2E3249;
+  --text:#F1ECE4; --soft:#D7D4DF; --muted:#A9A8BA; --faint:#8A8CA3;
+  --serif:"Hahmlet","Noto Serif KR","AppleMyungjo","Batang",serif;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --wrap:1180px; --pad:clamp(18px,4vw,40px);
+}
+*{box-sizing:border-box}
+html{background:var(--night);color:var(--text);-webkit-text-size-adjust:100%}
+body{margin:0;font:400 16px/1.72 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh;word-break:keep-all;overflow-wrap:break-word}
+button,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+html.boot body{visibility:hidden}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:-1px}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px max(var(--pad),calc((100% - var(--wrap)) / 2));background:rgba(23,26,43,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.brand{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;font:500 17px/1 var(--serif);letter-spacing:-.01em;border-radius:6px}
+.brand:focus-visible{outline:2px solid var(--text);outline-offset:5px}
+.mark{width:22px;height:22px;flex:none;display:block}
+.event{color:var(--muted);font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lang{appearance:none;border:0;background:transparent;color:var(--soft);font:500 14px/1 var(--sans);padding:9px 14px;border-radius:999px;
+  box-shadow:inset 0 0 0 1.5px var(--line);cursor:pointer;flex:none}
+.lang:hover{color:var(--text);box-shadow:inset 0 0 0 1.5px var(--muted)}
+.lang:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+body[data-view="quiz"] .lang{display:none}
+.progress{display:flex;align-items:center;gap:14px;font:500 13px/1 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:9px}.dots span{display:flex;gap:4px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .3s,box-shadow .3s}
+.dots i.on{background:var(--text);box-shadow:0 0 7px rgba(255,242,224,.55)}
+@media (max-width:520px){.dots{gap:6px}.dots span{gap:3px}.dots i{width:5px;height:5px}body[data-view="quiz"] .brand .word{display:none}.event{display:none}}
+
+/* shared */
+.view{padding:clamp(28px,6vw,64px) var(--pad) 96px}
+.btn{appearance:none;border:0;border-radius:999px;padding:14px 26px;font:600 16px/1.1 var(--sans);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;transition:background .2s,box-shadow .25s,color .2s}
+.btn.primary{background:var(--text);color:var(--night)}
+.btn.primary:hover{background:#fff;box-shadow:0 0 0 5px rgba(241,236,228,.13),0 0 30px rgba(255,240,220,.22)}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--muted)}
+.btn.small{padding:9px 16px;font-size:14px}
+.btn[aria-pressed="true"]{box-shadow:inset 0 0 0 1.5px var(--text)}
+.btn:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.btn[disabled]{opacity:.45;cursor:default}
+.lamp{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);flex:none}
+
+/* 3D figure */
+.fig{margin:0;width:100%}
+.map{display:block;width:100%;height:auto;overflow:visible;-webkit-tap-highlight-color:transparent}
+.map .hit{fill:transparent;cursor:pointer;outline:none;transition:fill .2s}
+.map .hit:hover{fill:rgba(255,255,255,.07)}
+.map .hit:focus-visible{stroke:var(--text);stroke-width:3}
+.map .labels{transition:opacity .8s}
+.map .labels.pre{opacity:0}
+.map text{pointer-events:none}
+.map .veil{transition:opacity 1.2s cubic-bezier(.25,.7,.25,1)}
+.map .spot{animation:fadeIn .7s ease-out .7s both}
+.map .pin-s,.map .pin-in,.map .pin-pulse{transform-box:fill-box;transform-origin:50% 50%}
+.map .pin-in{animation:pinDrop .75s cubic-bezier(.2,1.35,.4,1) 1s both}
+.map .pin-pulse{opacity:0;animation:pulse 2.6s ease-out 1.8s infinite}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pinDrop{from{opacity:0;transform:translateY(-44px) scale(1.5)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{opacity:.75;transform:scale(.7)}100%{opacity:0;transform:scale(1.7)}}
+@media (max-width:560px){.map .tri,.map .sub{display:none}.map .pin-s{transform:scale(1.3)}}
+.inspector{margin:18px 0 0;max-width:34em;min-height:7.2em;color:var(--muted);font-size:15px;line-height:1.65}
+.inspector p{margin:0}
+.insp-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-bottom:4px!important}
+.insp-head strong{font:600 19px/1.3 var(--serif);color:var(--text)}
+.insp-head span{font-size:13.5px;color:var(--faint)}
+.insp-head em{font-style:normal;font-size:12.5px;font-weight:600;color:var(--night);background:var(--text);border-radius:99px;padding:2px 9px}
+.insp-tag{color:var(--soft)}
+
+/* intro */
+.intro{max-width:var(--wrap);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,540px);
+  grid-template-areas:"main fig" "more fig";column-gap:clamp(32px,7vw,96px);align-items:center}
+.intro-main{grid-area:main;align-self:end}
+.intro-fig{grid-area:fig}
+.intro-more{grid-area:more;align-self:start}
+.intro h1{font:250 clamp(36px,4.6vw,60px)/1.18 var(--serif);letter-spacing:-.02em;margin:0 0 26px;text-wrap:balance}
+.intro h1 span{white-space:nowrap}
+html[lang="en"] .intro h1{font-size:clamp(32px,3.6vw,52px)}
+.lede{font-size:17.5px;color:var(--soft);max-width:30em;margin:0 0 30px}
+.cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.meta{color:var(--muted);font-size:14.5px}
+.group{display:grid;gap:8px;margin:0 0 22px;max-width:22em}
+.group label{font-weight:600;font-size:15px}
+.group select{appearance:none;background:var(--stage) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23A9A8BA' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 16px center;
+  border:1.5px solid var(--line);border-radius:12px;padding:12px 40px 12px 14px;font-size:16px}
+.group select:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.group .need{color:var(--soft);font-size:14px;margin:0}
+.notice{margin:20px 0 0;color:var(--faint);font-size:13.5px;max-width:30em}
+.notice.warn{color:var(--text);background:rgba(250,178,25,.12);box-shadow:inset 3px 0 0 #fab219;border-radius:8px;padding:10px 14px}
+.legend{margin:46px 0 0;display:grid;gap:14px;max-width:30em}
+.legend dt{display:flex;align-items:center;gap:14px;font-weight:600;font-size:15.5px}
+.legend dd{margin:2px 0 0 24px;color:var(--muted);font-size:14.5px;line-height:1.55}
+@media (max-width:900px){
+  .intro{grid-template-columns:minmax(0,1fr);grid-template-areas:"main" "fig" "more"}
+  html[lang="en"] .intro h1{font-size:clamp(32px,5.2vw,44px)}
+  .intro h1 .g{white-space:normal}
+  .intro-fig{max-width:540px;margin:36px auto 0;width:100%}
+}
+
+/* quiz */
+.quiz{max-width:720px;margin:0 auto}
+.guide{color:var(--muted);text-align:center;max-width:31em;margin:0 auto 24px;font-size:15.5px}
+.q{padding:28px 12px 30px;border-radius:22px;transition:opacity .35s,background .3s}
+.q-text{margin:0 0 20px;text-align:center;font:500 clamp(17px,2.3vw,19.5px)/1.6 var(--sans);text-wrap:balance}
+.q.done{opacity:.4}.q.done:hover,.q.done:focus-within{opacity:1}
+.q.need{background:rgba(255,255,255,.05)}
+.scale{display:flex;align-items:center;justify-content:center;gap:18px}
+.end{font-size:14px;color:var(--muted);width:4.2em;flex:none}
+.end.l{text-align:right}.end.r{text-align:left;color:var(--soft)}
+.opts{display:flex;align-items:center;gap:clamp(7px,1.7vw,15px)}
+.opt{position:relative;display:block;width:var(--sz);height:var(--sz);flex:none}
+.opt input{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);margin:0;opacity:0;cursor:pointer;z-index:1}
+.opt .d{display:block;width:100%;height:100%;border-radius:50%;border:1.5px solid rgba(241,236,228,.34);transition:background .18s,border-color .18s,box-shadow .3s,transform .18s}
+.opt:hover .d{border-color:rgba(241,236,228,.85);transform:scale(1.07)}
+.opt input:checked + .d{background:rgba(255,246,232,var(--lv));border:2.5px solid var(--text);box-shadow:0 0 calc(3px + var(--lv) * 26px) rgba(255,236,210,calc(var(--lv) * .55))}
+.opt input:focus-visible + .d{outline:2px solid var(--text);outline-offset:4px}
+.o1,.o7{--sz:44px}.o2,.o6{--sz:36px}.o3,.o5{--sz:29px}.o4{--sz:24px}
+.o1{--lv:.1}.o2{--lv:.22}.o3{--lv:.36}.o4{--lv:.5}.o5{--lv:.66}.o6{--lv:.83}.o7{--lv:1}
+@media (max-width:520px){
+  .scale{display:grid;grid-template-columns:1fr 1fr;gap:12px 0}
+  .opts{grid-column:1/-1;grid-row:1;justify-content:space-between}
+  .end{width:auto}.end.l{text-align:left;grid-row:2}.end.r{text-align:right;grid-row:2}
+  .o1,.o7{--sz:40px}.o2,.o6{--sz:33px}.o3,.o5{--sz:27px}.o4{--sz:22px}
+}
+.qnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px;padding-top:28px;border-top:1px solid var(--line)}
+.qmsg{flex:1;margin:0;text-align:center;color:var(--muted);font-size:14px}
+.qnav .btn[data-hidden]{visibility:hidden}
+
+/* result */
+.result{max-width:var(--wrap);margin:0 auto;display:grid;grid-template-columns:minmax(320px,540px) minmax(0,1fr);
+  grid-template-areas:"fig head" "fig body";column-gap:clamp(36px,6vw,88px);align-items:start}
+.rhead{grid-area:head;max-width:35em}
+.result-fig{grid-area:fig;position:sticky;top:80px}
+.rtext{grid-area:body;max-width:35em}
+.rhead h2{font:600 clamp(42px,5.8vw,70px)/1.06 var(--serif);letter-spacing:-.025em;margin:0 0 16px;text-wrap:balance}
+.rhead h2 .word{font-weight:300}
+.where{color:var(--soft);font-size:17px;margin:0 0 30px}
+.tagline{font:400 clamp(21px,2.4vw,25px)/1.45 var(--serif);margin:0 0 12px}
+.desc{color:var(--soft);margin:0}
+.rsec{margin-top:50px}
+.rsec h3{font:500 20px/1.3 var(--serif);margin:0 0 6px}
+.cap{color:var(--muted);font-size:14.5px;margin:0 0 18px}
+.size-row{display:flex;align-items:baseline;gap:18px;margin:12px 0 10px}
+.size-fig{font:600 56px/1 var(--sans);letter-spacing:-.02em}
+.size-sub{color:var(--muted);font-size:15px}
+.note{color:var(--soft);margin:0}
+.note + .note{margin-top:8px}
+.note.hint{color:var(--faint);font-size:14px}
+.bars{display:grid;gap:15px}
+.bar{display:grid;grid-template-columns:12.5em minmax(0,1fr) 3em;align-items:center;gap:16px}
+.bar-name{display:flex;align-items:center;gap:11px;font-size:15.5px}
+.track{position:relative;height:10px;border-radius:99px;background:rgba(241,236,228,.08)}
+.fill{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--c);transition:width 1.1s cubic-bezier(.25,.7,.25,1)}
+.bar.on .fill{box-shadow:0 0 14px color-mix(in srgb,var(--c) 55%,transparent)}
+.bar.off .fill{opacity:.42}
+.mark-line{position:absolute;top:-6px;bottom:-6px;border-left:1.5px dashed rgba(241,236,228,.6)}
+.val{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.bar.off .val,.bar.off .bar-name{color:var(--muted)}
+@media (max-width:560px){.bar{grid-template-columns:1fr auto;gap:8px 12px}.track{grid-column:1/-1;grid-row:2}}
+.compare{display:grid;gap:8px}
+.compare:empty{display:none}
+.maplink{margin-top:14px!important}
+.sendform{display:grid;gap:8px;margin:12px 0 14px}
+.nick-label{font-weight:600;font-size:15px}
+.nick-label small{font-weight:400;font-size:14px;color:var(--muted);margin-left:4px}
+.send-row{display:flex;flex-wrap:wrap;gap:10px}
+.send-row input{flex:1 1 11em;min-width:0;appearance:none;background:var(--stage);border:1.5px solid var(--line);border-radius:12px;
+  padding:12px 14px;font:400 16px/1.2 var(--sans);color:var(--text)}
+.send-row input::placeholder{color:var(--faint)}
+.send-row input:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.send-row input[aria-invalid="true"]{border-color:#FAB219}
+.send-row input:disabled{opacity:.6}
+.retry{margin-top:12px}
+.tips{display:grid;gap:26px;margin-top:18px}
+.tip h4{display:flex;align-items:center;gap:10px;font:600 15.5px/1.4 var(--sans);margin:0 0 6px}
+.tip ul{margin:0;padding-left:1.15em;color:var(--soft)}
+.tip li+li{margin-top:4px}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:56px}
+.fine{margin:40px 0 0;color:var(--faint);font-size:13.5px;line-height:1.7}
+@media (max-width:900px){
+  .result{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "fig" "body"}
+  .result-fig{position:static;max-width:540px;margin:0 auto 32px;width:100%}
+  .where{margin-bottom:18px}
+}
+
+/* image overlay */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(9,10,19,.84);display:grid;place-items:center;padding:20px}
+.sheet{background:var(--stage);border-radius:22px;padding:18px;width:min(460px,100%);max-height:94vh;display:grid;gap:14px;grid-template-rows:minmax(0,1fr) auto}
+.sheet img{display:block;width:100%;height:100%;min-height:0;object-fit:contain;border-radius:12px}
+.sheet .row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.sheet .hint{color:var(--muted);font-size:13.5px;margin:0;flex:1 1 12em}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+  .map .pin-pulse{display:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="brand" id="brand" type="button" aria-label="처음 화면으로" data-ta="brandAria">
+    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="7" y="0.5" width="10" height="7.5" rx="2" fill="#FF5A7E"/>
+      <rect x="0.5" y="7" width="7.5" height="10" rx="2" fill="#FFB938"/>
+      <rect x="16" y="7" width="7.5" height="10" rx="2" fill="#4A97FF"/>
+      <rect x="7" y="16" width="10" height="7.5" rx="2" fill="#3BD68A"/>
+      <rect x="8.5" y="8.5" width="7" height="7" rx="1.5" fill="#FFF6E8"/>
+    </svg>
+    <span class="word" data-t="brand">이키가이 지도</span>
+  </button>
+  <span class="event" id="eventTitle" hidden></span>
+  <div class="progress" id="progress" hidden>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <span id="count" aria-live="polite"></span>
+  </div>
+  <button class="lang" id="langBtn" type="button"></button>
+</header>
+
+<main>
+  <!-- ===== intro ===== -->
+  <section id="intro" class="view">
+    <div class="intro">
+      <div class="intro-main">
+        <h1 data-th="h1"><span>내 일은</span> <span>네 개의 빛 중</span> <span>어디에 닿아 있을까</span></h1>
+        <p class="lede" data-t="lede">좋아하는 것, 잘하는 것, 세상이 필요로 하는 것, 돈을 벌 수 있는 것. 32개의 문장에 답하면 네 빛이 겹치는 지도 위에 지금 내 자리와 이키가이의 크기를 보여 드려요.</p>
+        <div class="group" id="groupBox" hidden>
+          <label for="groupSel" data-t="groupQ">어느 그룹에 속하나요?</label>
+          <select id="groupSel"><option value="" data-t="groupPick">골라 주세요</option></select>
+          <p class="need" id="groupNeed" hidden data-t="groupNeed">시작하기 전에 그룹을 골라 주세요.</p>
+        </div>
+        <div class="cta-row">
+          <button class="btn primary" id="startBtn" type="button">검사 시작하기</button>
+          <button class="btn ghost" id="restartBtn" type="button" hidden data-t="restart">처음부터 다시</button>
+          <span class="meta" id="startMeta">32문항, 5분 정도 걸려요</span>
+        </div>
+        <p class="notice" id="notice" hidden></p>
+      </div>
+      <figure class="fig intro-fig">
+        <div id="introMap"></div>
+        <figcaption class="inspector" id="introInsp" aria-live="polite"></figcaption>
+      </figure>
+      <div class="intro-more">
+        <dl class="legend" id="legend"></dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== quiz ===== -->
+  <section id="quiz" class="view" hidden>
+    <div class="quiz">
+      <p class="guide" id="guide" data-t="guide">지금 가장 많은 시간을 쓰는 일(직업, 연구, 학업, 사업 등)을 떠올리며 답해 주세요. 되고 싶은 모습 말고 지금의 모습을 기준으로, 오래 고민하지 않아도 괜찮아요.</p>
+      <form id="qform" novalidate></form>
+      <div class="qnav">
+        <button class="btn ghost" id="prevBtn" type="button" data-t="prev">이전</button>
+        <p class="qmsg" id="qmsg" aria-live="polite"></p>
+        <button class="btn primary" id="nextBtn" type="button">다음</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== result ===== -->
+  <section id="result" class="view" hidden>
+    <div class="result">
+      <header class="rhead">
+        <h2 id="rName"></h2>
+        <p class="where" id="rWhere"></p>
+      </header>
+      <figure class="fig result-fig">
+        <div id="resultMap"></div>
+        <figcaption class="inspector" id="resultInsp" aria-live="polite"></figcaption>
+      </figure>
+      <article class="rtext">
+        <p class="tagline" id="rTag"></p>
+        <p class="desc" id="rDesc"></p>
+        <section class="rsec" id="rCompareSec" hidden>
+          <h3 id="rCompareTitle">결과 보내기</h3>
+          <form class="sendform" id="sendForm" novalidate hidden>
+            <label class="nick-label" for="nickInput"><span data-t="nick">닉네임</span> <small id="nickOpt"></small></label>
+            <div class="send-row">
+              <input id="nickInput" type="text" maxlength="20" autocomplete="nickname" enterkeyhint="send" spellcheck="false" aria-describedby="nickHint">
+              <button class="btn primary" id="sendBtn" type="submit">결과 보내기</button>
+            </div>
+            <p class="note hint" id="nickHint"></p>
+          </form>
+          <div class="compare" id="rCompare" aria-live="polite"></div>
+          <button class="btn ghost small retry" id="retryBtn" type="button" hidden data-t="retry">다시 보내기</button>
+        </section>
+        <section class="rsec">
+          <h3 data-t="sizeTitle">이키가이 크기</h3>
+          <div class="size-row"><span class="size-fig" id="rSize"></span><span class="size-sub" data-t="sizeSub">네 빛이 모두 함께 닿는 부분</span></div>
+          <p class="note" id="rSizeNote"></p>
+          <p class="note" id="rSizeNext"></p>
+        </section>
+        <section class="rsec">
+          <h3 data-t="barsTitle">네 개의 빛</h3>
+          <p class="cap" id="rBarsCap"></p>
+          <div class="bars" id="rBars"></div>
+        </section>
+        <section class="rsec">
+          <h3 data-t="tipsTitle">해볼 만한 것</h3>
+          <div class="tips" id="rTips"></div>
+        </section>
+        <div class="actions">
+          <button class="btn primary" id="saveBtn" type="button" data-t="saveImg">이미지로 저장</button>
+          <button class="btn ghost" id="againBtn" type="button" data-t="again">다시 하기</button>
+        </div>
+        <p class="fine" data-t="fine">스스로를 돌아보기 위한 도구예요. 검증된 심리검사가 아니고, 같은 사람도 시기와 상황에 따라 결과가 달라져요. 모양은 내 가장 밝은 빛과 비교해서 함께 켜진 빛으로 정하고, 이키가이 크기는 가장 약한 빛으로 정해요. 네 원으로 그린 이키가이 그림은 서구에서 재해석된 모델이고, 일본어 生き甲斐(이키가이)는 본래 ‘살아가는 보람’이라는 더 넓은 말이에요.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay" hidden role="dialog" aria-modal="true" aria-label="결과 이미지" data-ta="overlayAria">
+  <div class="sheet">
+    <img id="shot" alt="이키가이 지도 결과 이미지" data-talt="shotAlt">
+    <div class="row">
+      <p class="hint" data-t="shotHint">저장이 안 되면 이미지를 길게 누르거나 오른쪽 클릭해서 저장하세요.</p>
+      <a class="btn primary" id="dlLink" download="ikigai-map.png" href="#" data-t="dl">PNG 내려받기</a>
+      <button class="btn ghost" id="closeShot" type="button" data-t="close">닫기</button>
+    </div>
+  </div>
+</div>
+<noscript><p style="padding:24px">이 검사는 자바스크립트가 켜져 있어야 동작해요. This survey needs JavaScript to run.</p></noscript>
+
+<script>window.addEventListener('error', function (e) { if (/config\.js/.test(e.filename || '')) window.IKIGAI_CONFIG_ERROR = 'syntax'; }, true);</script>
+<script>document.write('<script src="config.js' + (/^http/.test(location.protocol) ? '?v=' + Date.now() : '') + '" onerror="window.IKIGAI_CONFIG_ERROR=\'missing\'"><\/script>');</script>
+<script src="core.js"></script>
+<script>
+(() => {
+'use strict';
+const I = window.Ikigai;
+const { EL, ELK, TYPES, ORDER, SCALE, QUESTIONS, TIPS, SHAPE_ORDER, qt, qj, hasJong, pct, members, level } = I;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const PER_PAGE = 8, PAGES = ORDER.length / PER_PAGE;
+const QMAP = Object.fromEntries(QUESTIONS.map(q => [q.id, q]));
+
+/* ---------------- words ----------------
+   Static markup is written in Korean and carries data-t keys; STATIC.en replaces it for English.
+   Everything the script writes comes from S. */
+const L = I.LANG;
+const p2 = n => String(n).padStart(2, '0');
+const nq = s => L === 'en' ? `“${s}”` : qt(s);
+const pickText = v => (v && typeof v === 'object' && !Array.isArray(v)) ? (v[L] || v.ko || v.en || '') : (v || '');
+const STR = {
+  ko: {
+    title:'이키가이 지도', desc:'32개의 문장에 답하고, 네 빛이 겹치는 지도 위에서 지금 내 자리와 이키가이의 크기를 확인해 보세요.',
+    langAria:'View in English',
+    deployFix:'진행자라면 Apps Script 배포 설정이 ‘실행: 나’, ‘액세스: 모든 사용자’인지 확인해 주세요.',
+    cfgMissing:'config.js 파일을 찾지 못했어요. index.html과 같은 폴더에 config.js를 올렸는지 확인해 주세요.',
+    cfgSyntax:'config.js를 읽지 못했어요. 주소를 작은따옴표(\')로 감쌌는지, 줄 끝 쉼표(,)가 빠지지 않았는지 확인해 주세요.',
+    cfgShape:'collectUrl이 https://script.google.com/…/exec 모양이 아니에요. Apps Script 배포 관리에 있는 웹 앱 URL을 config.js에 넣어 주세요.',
+    cfgMisplaced:k => `수집기 주소가 collectUrl이 아닌 ${k} 자리에 들어 있어요. config.js에서 주소를 collectUrl 줄로 옮겨 주세요.`,
+    otherApp:'collectUrl이 이키가이 수집기가 아닌 다른 곳을 가리켜요. Code.gs를 붙여 넣은 뒤 새 버전으로 배포했는지 확인해 주세요.',
+    offline:'인터넷에 연결되어 있지 않아요. 연결한 뒤 새로고침해 주세요.',
+    unreachable:'응답 수집기에 연결하지 못했어요. ',
+    notSavedNow:'지금은 응답이 저장되지 않아요. ',
+    noticeOff:'응답은 이름이나 연락처 없이 저장되고, 전체 통계를 내는 데에만 쓰여요.',
+    noticeOptional:'이름이나 연락처는 묻지 않아요. 닉네임은 원할 때만 적으면 되고, 응답은 전체 통계를 내는 데에만 쓰여요.',
+    noticeRequired:'이름이나 연락처는 묻지 않아요. 결과를 보낼 때 닉네임 하나만 적어 주세요. 응답은 전체 통계를 내는 데에만 쓰여요.',
+    practice:'연습 모드예요. 응답을 어디에도 보내지 않고, 이 기기에서만 결과를 보여 줘요.',
+    tSend:'결과 보내기', tSaved:'응답 저장', tCompare:'다른 참여자와 비교',
+    sending:'응답을 보내고 있어요.',
+    sent:nick => nick ? `${nq(nick)} 님의 응답을 보냈어요.` : '응답을 보냈어요.',
+    thanks:'참여해 주셔서 고마워요.',
+    joined:n => `지금까지 ${n}명이 참여했어요.`,
+    sameShape:(name, same, pc) => `나와 같은 ${qt(name)} 모양은 ${same}명으로, 전체의 ${pc}%예요.`,
+    topSize:pc => `내 이키가이 크기는 참여자 중 상위 ${pc}%예요.`,
+    needFive:'참여자가 다섯 명이 되면 다른 사람들과 비교해 볼 수 있어요.',
+    statsLater:'응답은 이미 보냈어요. 다른 참여자 통계는 지금 불러오지 못했어요.',
+    failSaid:m => `응답을 보내지 못했어요. 수집기가 이렇게 답했어요: ${m}`,
+    failWhy:pr => `응답을 보내지 못했어요. ${pr}`,
+    failNet:'응답을 보내지 못했어요. 인터넷 연결을 확인하고 다시 보내 주세요.',
+    notSent:pr => `이번 응답은 보내지 않았어요. ${pr}`,
+    practiceSent:'연습 모드라 이번 응답은 어디에도 보내지 않았어요.',
+    practiceHint:path => `이 페이지가 읽은 config.js는 ${path}이고, 여기의 collectUrl이 비어 있어요. 응답을 모으려면 이 파일의 collectUrl에 Apps Script 웹 앱 URL을 넣어 주세요.`,
+    nickOpt:'선택', nickPh:'예: 별빛',
+    nickHintOptional:'비워 두면 닉네임 없이 보내요. 닉네임은 모두의 자리 지도에서 다른 참여자와 진행자에게 보일 수 있어요.',
+    nickHintRequired:'모두의 자리 지도에서 이 닉네임으로 보여요. 실명 대신 별명을 써도 돼요.',
+    seeMap:'모두의 자리 보기',
+    nickNeed:'닉네임을 적어 주세요.',
+    sendBtn:'결과 보내기', resendBtn:'다시 보내기', sendingBtn:'보내는 중',
+    outside:'네 사각형 바깥', mine:'내 자리',
+    inspSub:(area, where) => `${area ? area + ', ' : ''}${where}`,
+    startSee:'내 결과 보기', startGo:(n, N) => `이어서 하기 (${n}/${N})`, start:'검사 시작하기', startMeta:'32문항, 5분 정도 걸려요',
+    introDefault:'칸을 누르면 그 자리에 선 사람의 모습이 보여요.',
+    endL:'아니다', endR:'그렇다', next:'다음', seeResult:'결과 보기',
+    missing:n => `아직 답하지 않은 문장이 ${n}개 있어요.`,
+    where0:'네 빛 모두 아주 약해서, 아직 모양이 잡히지 않았어요. 지도에서는 네 사각형 바깥에 서 있어요.',
+    where15:'네 빛이 고르게 닿는 모양이에요. 네 사각형이 모두 겹치는 한가운데에 서 있어요.',
+    where1:a => `${qt(a)} 하나가 유난히 밝은 모양이에요. 그 사각형에만 들어가 있어요.`,
+    where2:(a, b, area) => `${qj(a, '과', '와')} ${qj(b, '이', '가')} 함께 밝은 모양이에요. 둘이 겹치는 ${qt(area)} 칸에 서 있어요.`,
+    whereOff:(a, b, cell) => `${qj(a, '과', '와')} ${qj(b, '이', '가')} 함께 밝은 모양이에요. 지도에서 서로 마주 보는 두 사각형이라 둘만 겹치는 칸이 없어서, 가장 가까운 ${qt(cell)} 칸에 표시했어요.`,
+    where3:(a, b, c, off) => `${qt(a)}, ${qt(b)}, ${qj(c, '이', '가')} 함께 밝은 칸에 서 있어요. ${qt(off)}만 상대적으로 어두워요.`,
+    sizeNote:w => `가장 약한 빛인 ${qj(w, '이', '가')} 크기를 정해요. 네 빛이 모두 같은 만큼 밝아야 그 크기 그대로 이키가이가 돼요.`,
+    sizeNext:(w, gap, to, second) => `${qj(w, '이', '가')} ${gap}%p 밝아지면, 이키가이도 ${to}%까지 커져요. 그다음은 ${qj(second, '과', '와')} 함께 키워야 해요.`,
+    sizeLevel:'네 빛 중 약한 쪽들이 거의 같아서, 함께 키워야 이키가이가 커져요.',
+    barsCap:t => `가장 밝은 빛의 75%(${t}%)를 넘으면 함께 켜진 빛으로 봐요. 점선이 그 기준이에요.`,
+    resultInsp:'밝게 남은 칸일수록 지금의 나와 가까운 조합이에요. 칸을 눌러 그 자리에 선 사람과 비교해 보세요.',
+    imgBrand:'이키가이 지도', imgSize:'이키가이 크기', imgMaking:'이미지 만드는 중', imgFail:'이미지를 만들지 못했어요',
+    date:d => `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`,
+  },
+  en: {
+    title:'Ikigai Map', desc:'Answer 32 statements and see where you stand on a map of four overlapping lights, and how big your ikigai is.',
+    langAria:'한국어로 보기',
+    deployFix:'If you\'re the organizer, check that the Apps Script deployment is set to Execute as: Me and Who has access: Anyone.',
+    cfgMissing:'config.js wasn\'t found. Check that config.js is in the same folder as index.html.',
+    cfgSyntax:'config.js couldn\'t be read. Check that the address is wrapped in single quotes (\') and that no comma (,) is missing at the end of a line.',
+    cfgShape:'collectUrl doesn\'t look like https://script.google.com/…/exec. Put the web app URL from Manage deployments in Apps Script into config.js.',
+    cfgMisplaced:k => `The collector address is under ${k} instead of collectUrl. Move it to the collectUrl line in config.js.`,
+    otherApp:'collectUrl points to something other than the Ikigai collector. Check that you pasted Code.gs and deployed a new version.',
+    offline:'You\'re not connected to the internet. Connect and reload the page.',
+    unreachable:'Couldn\'t reach the response collector. ',
+    notSavedNow:'Responses aren\'t being saved right now. ',
+    noticeOff:'Responses are saved without names or contact details and are used only for group statistics.',
+    noticeOptional:'We don\'t ask for your name or contact details. A nickname is up to you, and responses are used only for group statistics.',
+    noticeRequired:'We don\'t ask for your name or contact details, only a nickname when you send your result. Responses are used only for group statistics.',
+    practice:'Practice mode. Your answers aren\'t sent anywhere, and your result is shown on this device only.',
+    tSend:'Send your result', tSaved:'Your response', tCompare:'Compared with others',
+    sending:'Sending your response…',
+    sent:nick => nick ? `Sent as ${nq(nick)}.` : 'Your response was sent.',
+    thanks:'Thank you for taking part.',
+    joined:n => n === 1 ? 'You are the first to take part.' : `${n} people have taken part so far.`,
+    sameShape:(name, same, pc) => `${pc}% of participants (${same}) have the ${name} shape, like you.`,
+    topSize:pc => `Your ikigai size is in the top ${pc}% of participants.`,
+    needFive:'Once five people have taken part, you can compare yourself with others.',
+    statsLater:'Your response was already sent. Other participants\' statistics couldn\'t be loaded right now.',
+    failSaid:m => `Your response couldn't be sent. The collector replied: ${m}`,
+    failWhy:pr => `Your response couldn't be sent. ${pr}`,
+    failNet:'Your response couldn\'t be sent. Check your internet connection and send it again.',
+    notSent:pr => `This response wasn't sent. ${pr}`,
+    practiceSent:'Practice mode, so this response wasn\'t sent anywhere.',
+    practiceHint:path => `This page read the config.js at ${path}, and its collectUrl is empty. To collect responses, put the Apps Script web app URL in that file's collectUrl.`,
+    nickOpt:'optional', nickPh:'e.g. Stardust',
+    nickHintOptional:'Leave it blank to send without one. Your nickname may be shown to other participants and the organizer on the shared map.',
+    nickHintRequired:'This is how you\'ll appear on the shared map. A made-up name is fine.',
+    seeMap:'See everyone on the map',
+    nickNeed:'Please enter a nickname.',
+    sendBtn:'Send my result', resendBtn:'Send again', sendingBtn:'Sending',
+    outside:'Outside all four squares', mine:'Your place',
+    inspSub:(area, where) => `${area ? area + ': ' : ''}${where}`,
+    startSee:'See my result', startGo:(n, N) => `Continue (${n}/${N})`, start:'Start', startMeta:'32 statements, about 5 minutes',
+    introDefault:'Tap a cell to see the kind of person who stands there.',
+    endL:'Disagree', endR:'Agree', next:'Next', seeResult:'See result',
+    missing:n => n === 1 ? '1 statement still needs an answer.' : `${n} statements still need an answer.`,
+    where0:'All four lights are very dim, so no shape has formed yet. On the map you stand outside all four squares.',
+    where15:'All four lights reach you evenly. You stand in the middle, where all four squares overlap.',
+    where1:a => `${nq(a)} shines especially bright. You're inside that square only.`,
+    where2:(a, b, area) => `${nq(a)} and ${nq(b)} are bright together. You stand in the ${area} cell, where they overlap.`,
+    whereOff:(a, b, cell) => `${nq(a)} and ${nq(b)} are bright together. They face each other on the map and have no cell of their own, so you're shown in the nearest one, ${cell}.`,
+    where3:(a, b, c, off) => `${nq(a)}, ${nq(b)} and ${nq(c)} are bright together. Only ${nq(off)} is relatively dim.`,
+    sizeNote:w => `Your weakest light, ${nq(w)}, sets the size. Only the part all four lights reach counts as ikigai.`,
+    sizeNext:(w, gap, to, second) => `If ${nq(w)} gets ${gap} points brighter, your ikigai grows to ${to}%. After that, it grows only together with ${nq(second)}.`,
+    sizeLevel:'Your weaker lights are almost level, so they need to grow together for your ikigai to grow.',
+    barsCap:t => `A light counts as on when it reaches 75% of your brightest light (${t}%). The dashed line marks that point.`,
+    resultInsp:'The brighter a cell stays, the closer it is to you. Tap a cell to compare yourself with the person who stands there.',
+    imgBrand:'Ikigai Map', imgSize:'Ikigai size', imgMaking:'Making the image…', imgFail:'Couldn\'t make the image',
+    date:d => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`,
+  },
+};
+const S = STR[L];
+const STATIC_EN = {
+  brandAria:'Back to start', brand:'Ikigai Map',
+  h1:'<span class="g">Which of the four lights</span> <span class="g">does your work reach?</span>',
+  lede:'What you love, what you\'re good at, what the world needs, what you can be paid for. Answer 32 statements and you\'ll see where you stand on a map of these four overlapping lights, along with the size of your ikigai.',
+  groupQ:'Which group are you in?', groupPick:'Choose one', groupNeed:'Please choose a group before you start.',
+  restart:'Start over',
+  guide:'Answer with the work you spend the most time on in mind (your job, research, studies, business and so on). Go by who you are now, not who you want to be. There\'s no need to think long.',
+  prev:'Back',
+  nick:'Nickname', retry:'Send again',
+  sizeTitle:'Ikigai size', sizeSub:'The part all four lights reach', barsTitle:'The four lights', tipsTitle:'Things to try',
+  saveImg:'Save as image', again:'Take it again',
+  fine:'This is a tool for reflection, not a validated psychological test, and the same person can get different results at different times. Your shape is the set of lights that are on compared with your brightest light, and your ikigai size is set by your weakest light. The four-circle ikigai diagram is a Western reinterpretation; the Japanese word 生き甲斐 (ikigai) originally has the broader meaning of “a reason for being”.',
+  overlayAria:'Result image', shotAlt:'Ikigai Map result image',
+  shotHint:'If saving doesn\'t work, press and hold the image or right-click it to save it.', dl:'Download PNG', close:'Close',
+};
+function applyStatic() {
+  if (L !== 'en') return;
+  $$('[data-t]').forEach(el => { const v = STATIC_EN[el.dataset.t]; if (v != null) el.textContent = v; });
+  $$('[data-th]').forEach(el => { const v = STATIC_EN[el.dataset.th]; if (v != null) el.innerHTML = v; });
+  $$('[data-ta]').forEach(el => { const v = STATIC_EN[el.dataset.ta]; if (v != null) el.setAttribute('aria-label', v); });
+  $$('[data-talt]').forEach(el => { const v = STATIC_EN[el.dataset.talt]; if (v != null) el.alt = v; });
+}
+
+/* ---------------- state ---------------- */
+const KEY = 'ikigai-map:v2';
+let st = { a:{}, p:0, sub:null, t0:null, group:'', nick:'', sentNick:'' };
+let lastPointer = 0, lastRes = null;
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (o && o.a) st = Object.assign(st, o); } catch (e) {}
+const answered = () => ORDER.filter(id => st.a[id]).length;
+function clientId() {
+  try {
+    let id = localStorage.getItem('ikigai-map:client');
+    if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)); localStorage.setItem('ikigai-map:client', id); }
+    return id;
+  } catch (e) { return ''; }
+}
+
+/* ---------------- where answers go (optional) ----------------
+   sheet:  config.js has a Google Apps Script address (works from any host, or from a file)
+   server: this page was opened from server.py
+   none:   try it alone; nothing is saved                                          */
+const CFG = Object.assign({ collectUrl:'', participantUrl:'', title:'', groups:[], notice:'', publicStats:true, nickname:'optional' }, window.IKIGAI_CONFIG || {});
+const API = { ok:false, mode:'none', cfg:null, problem:'' };
+// API.problem: what is wrong with the setup, as cause + fix the organiser can act on ('' = nothing wrong)
+const DEPLOY_FIX = S.deployFix;
+const urlLooksRight = u => /^https:\/\/script\.google\.com\/.+\/exec(\?.*)?$/.test(u) || /^http:\/\/(localhost|127\.)/.test(u);
+function misplacedKey() {
+  const c = window.IKIGAI_CONFIG || {};
+  return Object.keys(c).find(k => k !== 'collectUrl' && /script\.google\.com\//.test(String(c[k]))) || '';
+}
+const CFG_PROBLEM = window.IKIGAI_PREVIEW ? '' : !window.IKIGAI_CONFIG
+  ? (window.IKIGAI_CONFIG_ERROR === 'missing' ? S.cfgMissing : S.cfgSyntax)
+  : (CFG.collectUrl && !urlLooksRight(String(CFG.collectUrl).trim()) ? S.cfgShape
+    : !CFG.collectUrl && misplacedKey() ? S.cfgMisplaced(misplacedKey())
+    : '');
+// the config.js this page actually read, so "I did write it in the file" can be checked against the right file
+function cfgPath() {
+  try { const u = new URL('config.js', location.href); return u.protocol === 'file:' ? decodeURIComponent(u.pathname) : u.origin + u.pathname; }
+  catch (e) { return 'config.js'; }
+}
+// nickname: 'optional' (default), 'required', or 'off' (send right away, no form)
+function NICK() {
+  const v = String((API.cfg && API.cfg.nickname) || CFG.nickname || 'optional').toLowerCase();
+  return ['optional', 'required', 'off'].includes(v) ? v : 'optional';
+}
+const cleanNick = v => String(v || '').replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+function timed(url, opt = {}, ms = 20000) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
+  return fetch(url, Object.assign({ signal:ctl.signal, cache:'no-store' }, opt)).finally(() => clearTimeout(t));
+}
+const sheetUrl = q => CFG.collectUrl + (CFG.collectUrl.includes('?') ? '&' : '?') + q;
+// resolves once the page knows where answers go; the collector check keeps running in the background
+async function probe() {
+  if (CFG.collectUrl) {
+    API.ok = true; API.mode = 'sheet';
+    API.cfg = { title:CFG.title, groups:CFG.groups || [], notice:CFG.notice, publicStats:CFG.publicStats !== false, nickname:CFG.nickname };
+    API.problem = CFG_PROBLEM;
+    applyConfig();
+    ping();
+    return;
+  }
+  if (location.protocol !== 'file:') {
+    try {
+      const r = await timed('api/config', {}, 2500);
+      const j = r.ok ? await r.json() : null;
+      if (j && j.app === 'ikigai-map') { API.ok = true; API.mode = 'server'; API.cfg = j; }
+    } catch (e) {}
+  }
+  if (API.mode !== 'server') API.problem = CFG_PROBLEM;
+  applyConfig();
+}
+// ask the collector whether it answers, before anyone spends five minutes on the questions
+async function ping() {
+  let why = '';
+  try {
+    const j = await (await timed(CFG.collectUrl, {}, 15000)).json();
+    if (j.app !== 'ikigai-map') why = S.otherApp;
+  } catch (e) {
+    why = navigator.onLine === false ? S.offline : API.problem || S.unreachable + DEPLOY_FIX;
+  }
+  API.problem = why;
+  paintNotice();
+}
+async function apiSubmit(body) {
+  const r = API.mode === 'sheet'
+    // text/plain keeps this a simple request, which Apps Script answers without a CORS preflight
+    ? await timed(CFG.collectUrl, { method:'POST', redirect:'follow', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body:JSON.stringify(body) })
+    : await timed('api/responses', { method:'POST', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.ok) { const err = new Error(j.error || 'HTTP ' + r.status); err.said = !!j.error; throw err; }
+  return j;
+}
+async function apiSummary(shape, core) {
+  const q = `shape=${shape}&core=${core.toFixed(4)}`;
+  const r = await timed(API.mode === 'sheet' ? sheetUrl('action=summary&' + q) : `api/summary?${q}`);
+  const j = await r.json(); if (!r.ok || !j.ok) throw new Error('summary');
+  return j;
+}
+function paintNotice() {
+  const n = $('#notice'), pr = API.problem;
+  n.classList.toggle('warn', !!pr);
+  const own = API.ok ? pickText(API.cfg.notice) : '';
+  n.textContent = pr ? S.notSavedNow + pr
+    : API.ok ? (own || { off:S.noticeOff, optional:S.noticeOptional, required:S.noticeRequired }[NICK()])
+    : S.practice;
+  n.hidden = false;
+}
+function applyConfig() {
+  paintNotice();
+  if (!API.ok) return;
+  const c = API.cfg, title = pickText(c.title);
+  if (title) { $('#eventTitle').textContent = title; $('#eventTitle').hidden = false; document.title = `${S.title}, ${title}`; }
+  if (c.groups && c.groups.length) {
+    const sel = $('#groupSel');
+    c.groups.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+    if (st.group && c.groups.includes(st.group)) sel.value = st.group;
+    $('#groupBox').hidden = false;
+  }
+}
+/* the save box under the description: says what happened to this response, and holds the nickname form */
+const note = t => `<p class="note">${t}</p>`, hint = t => `<p class="note hint">${t}</p>`;
+function saveBox(title, html, retry) {
+  $('#rCompareSec').hidden = false; $('#rCompareTitle').textContent = title;
+  $('#rCompare').innerHTML = html; $('#retryBtn').hidden = !retry;
+}
+function showSendForm() {
+  const req = NICK() === 'required', inp = $('#nickInput');
+  saveBox(S.tSend, API.problem ? hint(esc(S.notSavedNow + API.problem)) : '');
+  $('#sendForm').hidden = false;
+  inp.value = st.nick || ''; inp.placeholder = S.nickPh; inp.required = req; inp.disabled = false; inp.removeAttribute('aria-invalid');
+  $('#nickOpt').textContent = S.nickOpt; $('#nickOpt').hidden = req;
+  $('#nickHint').textContent = req ? S.nickHintRequired : S.nickHintOptional;
+  $('#sendBtn').textContent = S.sendBtn; $('#sendBtn').disabled = false;
+}
+$('#sendForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = cleanNick($('#nickInput').value);
+  if (NICK() === 'required' && !v) {
+    $('#nickInput').setAttribute('aria-invalid', 'true'); $('#rCompare').innerHTML = note(S.nickNeed); $('#nickInput').focus();
+    return;
+  }
+  $('#nickInput').removeAttribute('aria-invalid');
+  st.nick = v; save();
+  submit(lastRes);
+});
+let saving = false;
+const READY = probe();
+async function submit(res) {
+  if (!API.ok || st.sub || saving) return;
+  saving = true;
+  const viaForm = NICK() !== 'off', nick = viaForm ? cleanNick(st.nick) : '';
+  if (viaForm) { $('#sendBtn').disabled = true; $('#sendBtn').textContent = S.sendingBtn; $('#nickInput').disabled = true; }
+  saveBox(viaForm ? S.tSend : API.cfg.publicStats === false ? S.tSaved : S.tCompare, note(S.sending));
+  const body = { client_id:clientId(), group:st.group || '', nickname:nick, lang:L, answers:st.a, duration:st.t0 ? (Date.now() - st.t0) / 1000 : null };
+  let err = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const j = await apiSubmit(body);
+      st.sub = j.id; st.sentNick = nick; save(); saving = false;
+      if (API.problem) { API.problem = ''; paintNotice(); }
+      $('#sendForm').hidden = true;
+      renderCompare(res, j.summary, j.map);
+      return;
+    } catch (e) { err = e; if (attempt === 0) await new Promise(ok => setTimeout(ok, 1500)); }
+  }
+  saving = false;
+  const msg = err && err.said ? note(S.failSaid(esc(err.message)))
+    : API.problem ? note(S.failWhy(esc(API.problem)))
+    : note(S.failNet) + (API.mode === 'sheet' ? hint(esc(DEPLOY_FIX)) : '');
+  if (viaForm) {
+    $('#sendBtn').disabled = false; $('#sendBtn').textContent = S.resendBtn; $('#nickInput').disabled = false;
+    saveBox(S.tSend, msg, false);
+  } else saveBox(S.tSaved, msg, true);
+}
+async function loadCompare(res) {
+  if (!API.ok) return;
+  $('#sendForm').hidden = true;
+  if (!st.sub) return NICK() === 'off' ? submit(res) : showSendForm();
+  if (API.cfg.publicStats === false) return renderCompare(res, null);
+  try { const j = await apiSummary(res.shape, res.core); renderCompare(res, j.summary, j.map); }
+  catch (e) { saveBox(S.tCompare, note(S.statsLater)); }
+}
+// the shared map opens in a new tab; it finds your own dot from what this browser remembers
+const mapLink = on => on ? `<p class="note maplink"><a class="btn ghost small" href="map.html?lang=${L}" target="_blank" rel="noopener">${S.seeMap}</a></p>` : '';
+function renderCompare(res, sm, mapOn) {
+  const sent = S.sent(esc(st.sentNick || ''));
+  if (!sm || API.cfg.publicStats === false) return saveBox(S.tSaved, note(`${sent} ${S.thanks}`));
+  const name = TYPES[res.shape].name, lines = [note(`${sent} ${S.joined(sm.n)}`)];
+  if (sm.n >= 5) {
+    lines.push(note(S.sameShape(name, sm.same, Math.round(sm.same / sm.n * 100))));
+    lines.push(note(S.topSize(Math.max(1, Math.round(sm.top * 100)))));
+  } else lines.push(note(S.needFive));
+  saveBox(S.tCompare, lines.join('') + mapLink(mapOn));
+}
+$('#retryBtn').addEventListener('click', () => submit(lastRes));
+
+/* ---------------- view switching ---------------- */
+function show(view) {
+  ['intro', 'quiz', 'result'].forEach(v => { $('#' + v).hidden = v !== view; });
+  document.body.dataset.view = view;
+  $('#progress').hidden = view !== 'quiz';
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- inspector ---------------- */
+function whereText(m) { return m ? members(m).map(e => e.name).join(' + ') : S.outside; }
+function inspectorHTML(m, mine) {
+  const T = TYPES[m];
+  return `<p class="insp-head"><strong>${T.name}</strong><span>${S.inspSub(T.area || '', whereText(m))}</span>${mine ? `<em>${S.mine}</em>` : ''}</p>
+    <p class="insp-tag">${T.tag}</p><p>${T.desc}</p>`;
+}
+
+/* ---------------- intro ---------------- */
+function renderLegend() {
+  $('#legend').innerHTML = EL.map(e => `<div><dt><span class="lamp" style="--c:${e.light}" aria-hidden="true"></span>${e.name}</dt><dd>${e.def}</dd></div>`).join('');
+}
+function refreshIntro() {
+  const n = answered(), start = $('#startBtn'), restart = $('#restartBtn'), meta = $('#startMeta');
+  if (n === ORDER.length) { start.textContent = S.startSee; restart.hidden = false; meta.textContent = ''; }
+  else if (n > 0) { start.textContent = S.startGo(n, ORDER.length); restart.hidden = false; meta.textContent = ''; }
+  else { start.textContent = S.start; restart.hidden = true; meta.textContent = S.startMeta; }
+}
+const INTRO_DEFAULT = S.introDefault;
+let introSvg = null;
+function renderIntroMap(dark) {
+  $('#introMap').innerHTML = I.buildMap('intro', { live:true, dark });
+  introSvg = $('#introMap svg');
+  I.wireMap(introSvg, m => { $('#introInsp').innerHTML = inspectorHTML(m, false); }, -1);
+}
+
+/* ---------------- quiz ---------------- */
+const pageIds = i => ORDER.slice(i * PER_PAGE, i * PER_PAGE + PER_PAGE);
+function renderDots() {
+  const g = [];
+  for (let i = 0; i < PAGES; i++) g.push(`<span>${pageIds(i).map(id => `<i class="${st.a[id] ? 'on' : ''}"></i>`).join('')}</span>`);
+  $('#dots').innerHTML = g.join('');
+  $('#count').textContent = `${answered()} / ${ORDER.length}`;
+}
+function renderPage() {
+  $('#qform').innerHTML = pageIds(st.p).map(id => {
+    const q = QMAP[id];
+    const opts = SCALE.map((label, i) => { const v = i + 1;
+      return `<label class="opt o${v}"><input type="radio" name="${id}" value="${v}"${st.a[id] === v ? ' checked' : ''}><span class="d" aria-hidden="true"></span><span class="sr">${label}</span></label>`; }).join('');
+    return `<div class="q${st.a[id] ? ' done' : ''}" data-id="${id}" role="radiogroup" aria-labelledby="t-${id}">
+      <p class="q-text" id="t-${id}">${q.t}</p>
+      <div class="scale"><span class="end l" aria-hidden="true">${S.endL}</span><div class="opts">${opts}</div><span class="end r" aria-hidden="true">${S.endR}</span></div></div>`;
+  }).join('');
+  $('#guide').hidden = st.p !== 0;
+  $('#prevBtn').toggleAttribute('data-hidden', st.p === 0);
+  $('#nextBtn').textContent = st.p === PAGES - 1 ? S.seeResult : S.next;
+  $('#qmsg').textContent = '';
+  renderDots();
+}
+function startQuiz(fresh) {
+  if (fresh) { st.a = {}; st.p = 0; st.sub = null; st.t0 = Date.now(); }
+  else {
+    const first = ORDER.findIndex(id => !st.a[id]);
+    st.p = first < 0 ? PAGES - 1 : Math.floor(first / PER_PAGE);
+    if (!st.t0) st.t0 = Date.now();
+  }
+  save(); renderPage(); show('quiz');
+}
+$('#qform').addEventListener('pointerdown', () => { lastPointer = performance.now(); });
+$('#qform').addEventListener('change', e => {
+  const inp = e.target; if (!inp.matches('input[type=radio]')) return;
+  st.a[inp.name] = +inp.value; st.sub = null; save(); renderDots();
+  const q = inp.closest('.q'); q.classList.add('done'); q.classList.remove('need');
+  const missing = $$('.q', $('#qform')).filter(f => !st.a[f.dataset.id]);
+  if (!missing.length) $('#qmsg').textContent = '';
+  if (performance.now() - lastPointer < 800) {
+    const target = missing.find(f => f.compareDocumentPosition(q) & Node.DOCUMENT_POSITION_PRECEDING) || missing[0] || $('#nextBtn');
+    setTimeout(() => target.scrollIntoView({ behavior:I.reduceMotion ? 'auto' : 'smooth', block:'center' }), 160);
+  }
+});
+$('#nextBtn').addEventListener('click', () => {
+  const missing = pageIds(st.p).filter(id => !st.a[id]);
+  if (missing.length) {
+    missing.forEach(id => $(`.q[data-id="${id}"]`).classList.add('need'));
+    $('#qmsg').textContent = S.missing(missing.length);
+    const first = $(`.q[data-id="${missing[0]}"]`);
+    first.scrollIntoView({ behavior:I.reduceMotion ? 'auto' : 'smooth', block:'center' });
+    $('input', first).focus({ preventScroll:true });
+    return;
+  }
+  if (st.p < PAGES - 1) { st.p++; save(); renderPage(); window.scrollTo(0, 0); }
+  else showResult(true);
+});
+$('#prevBtn').addEventListener('click', () => { if (st.p > 0) { st.p--; save(); renderPage(); window.scrollTo(0, 0); } });
+
+/* ---------------- result ---------------- */
+function whereSentence(r) {
+  const m = r.shape, T = TYPES[m], on = members(m).map(e => e.name);
+  if (m === 0) return S.where0;
+  if (m === 15) return S.where15;
+  if (on.length === 1) return S.where1(on[0]);
+  if (on.length === 2) return I.OFF_MAP.includes(m) ? S.whereOff(on[0], on[1], TYPES[r.place].name) : S.where2(on[0], on[1], T.area);
+  const off = EL.find(e => !(m & e.bit));
+  return S.where3(on[0], on[1], on[2], off.name);
+}
+function renderResult(r, animate) {
+  const T = TYPES[r.shape];
+  $('#rName').innerHTML = r.shape === 0 ? esc(T.name) : `<span class="word">${esc(r.word)}</span> ${esc(T.name)}`;
+  $('#rWhere').textContent = whereSentence(r);
+  $('#rTag').textContent = T.tag;
+  $('#rDesc').textContent = r.shape === 15 && r.glow < 0.55 ? T.descDim : T.desc;
+
+  // ikigai size
+  const weak = r.weakest, second = r.second;
+  $('#rSize').textContent = pct(r.core) + '%';
+  $('#rSizeNote').textContent = S.sizeNote(weak.name);
+  const gap = r.s[second.k] - r.s[weak.k];
+  $('#rSizeNext').textContent = gap >= 0.02 ? S.sizeNext(weak.name, pct(gap), pct(r.s[second.k]), second.name) : S.sizeLevel;
+
+  // bars
+  const mx = Math.max(r.s.L, r.s.G, r.s.N, r.s.P), thr = I.RHO * mx;
+  $('#rBarsCap').textContent = S.barsCap(pct(thr));
+  $('#rBars').innerHTML = EL.map(e => {
+    const v = pct(r.s[e.k]), on = !!(r.shape & e.bit);
+    return `<div class="bar ${on ? 'on' : 'off'}">
+      <span class="bar-name"><span class="lamp" style="--c:${e.light}"></span>${e.name}</span>
+      <span class="track"><span class="fill" style="--c:${e.light};width:${animate && !I.reduceMotion ? 0 : v}%" data-w="${v}"></span><span class="mark-line" style="left:${(thr * 100).toFixed(1)}%"></span></span>
+      <span class="val">${v}%</span></div>`;
+  }).join('');
+  requestAnimationFrame(() => requestAnimationFrame(() => $$('#rBars .fill').forEach(f => { f.style.width = f.dataset.w + '%'; })));
+
+  // tips: the weakest light first, then another light that is off
+  const order = [weak].concat(EL.filter(e => !(r.shape & e.bit) && e !== weak)).slice(0, 2);
+  $('#rTips').innerHTML = order.map(e => `<div class="tip"><h4><span class="lamp" style="--c:${e.light}"></span>${e.name}</h4><ul>${TIPS[e.k].map(t => `<li>${t}</li>`).join('')}</ul></div>`).join('');
+
+  // map: my pin, my cell outlined, every other cell dimmed by how unlike me it is
+  $('#resultMap').innerHTML = I.buildMap('res', { res:Object.assign({ s:r.s, place:r.place }, r.pos), live:true });
+  const svg = $('#resultMap svg');
+  I.wireMap(svg, m => { $('#resultInsp').innerHTML = inspectorHTML(m, m === r.place); }, r.place);
+  $('#resultInsp').textContent = S.resultInsp;
+  const reveal = () => $$('.veil', svg).forEach(v => v.setAttribute('opacity', v.dataset.v));
+  if (animate && !I.reduceMotion) requestAnimationFrame(() => requestAnimationFrame(reveal)); else reveal();
+}
+function showResult(animate) {
+  const r = I.analyze(st.a); lastRes = r;
+  show('result'); renderResult(r, animate);
+  READY.then(() => {
+    if (lastRes !== r) return;
+    if (API.ok) return loadCompare(r);
+    $('#sendForm').hidden = true;
+    saveBox(S.tSaved, API.problem ? note(S.notSent(esc(API.problem)))
+      : note(S.practiceSent) + (window.IKIGAI_PREVIEW ? '' : hint(S.practiceHint(esc(cfgPath())))));
+  });
+}
+
+/* ---------------- image ---------------- */
+async function makeImage(r) {
+  const W = 1080, H = 1350, M = 72, maxW = W - 2 * M, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.fillStyle = I.NIGHT; x.fillRect(0, 0, W, H);
+  try { await Promise.all(['300 92px Hahmlet', '600 92px Hahmlet', '400 36px Hahmlet', '500 28px "IBM Plex Sans KR"', '600 28px "IBM Plex Sans KR"'].map(f => document.fonts.load(f, '이키가이 지도 가나다 Ikigai Map 0123456789%'))); } catch (e) {}
+  const serif = (w, sz) => `${w} ${sz}px Hahmlet, "Noto Serif KR", AppleMyungjo, serif`;
+  const sans = (w, sz) => `${w} ${sz}px "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`;
+  const width = (font, t) => { x.font = font; return x.measureText(t).width; };
+  const T = TYPES[r.shape], title = API.ok ? pickText(API.cfg.title) : '';
+  // brand line
+  let bs = 28; const brand = S.imgBrand + (title ? `, ${title}` : '');
+  while (bs > 18 && width(serif(500, bs), brand) > maxW) bs -= 1;
+  x.fillStyle = '#A9A8BA'; x.font = serif(500, bs); x.textBaseline = 'middle'; x.fillText(brand, M, 86);
+  x.textBaseline = 'alphabetic';
+  // light word + shape name on one line
+  let ns = 88; const lead = r.shape ? r.word + ' ' : '';
+  while (ns > 52 && width(serif(300, ns), lead) + width(serif(600, ns), T.name) > maxW + 4) ns -= 2;
+  let xx = M - 4;
+  if (lead) { x.fillStyle = '#F1ECE4'; x.font = serif(300, ns); x.fillText(lead, xx, 210); xx += x.measureText(lead).width; }
+  x.fillStyle = '#F1ECE4'; x.font = serif(600, ns); x.fillText(T.name, xx, 210);
+  // tag: one line if it fits at 28px or more, otherwise two lines
+  let ts = 34, lines = [T.tag];
+  while (ts > 28 && width(serif(400, ts), T.tag) > maxW) ts -= 1;
+  if (width(serif(400, ts), T.tag) > maxW) {
+    ts = 30; const words = T.tag.split(' '); lines = [''];
+    for (const w of words) { const t = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w; if (width(serif(400, ts), t) > maxW && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = t; }
+    lines = lines.slice(0, 2);
+  }
+  x.fillStyle = '#D7D4DF'; x.font = serif(400, ts);
+  lines.forEach((t, i) => x.fillText(t, M, 266 + i * (ts + 10)));
+  const top = 266 + (lines.length - 1) * (ts + 10) + 30, S0 = lines.length > 1 ? 720 : 760;
+  const pic = new Image();
+  await new Promise((ok, no) => { pic.onload = ok; pic.onerror = no;
+    pic.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(I.buildMap('img', { res:Object.assign({ s:r.s, place:r.place }, r.pos), size:S0 })); });
+  x.drawImage(pic, (W - S0) / 2, top, S0, S0);
+  // ikigai size, then the four lights in one column
+  x.fillStyle = '#F1ECE4'; x.font = sans(600, 56); x.fillText(pct(r.core) + '%', M, 1132);
+  x.fillStyle = '#A9A8BA'; x.font = sans(500, 24); x.fillText(S.imgSize, M, 1172);
+  EL.forEach((e, i) => {
+    const bx = 360, by = 1094 + i * 44;
+    x.fillStyle = e.light; x.shadowColor = e.light; x.shadowBlur = 12; x.beginPath(); x.arc(bx + 8, by - 9, 8, 0, Math.PI * 2); x.fill(); x.shadowBlur = 0;
+    x.fillStyle = (r.shape & e.bit) ? '#F1ECE4' : '#A9A8BA'; x.font = sans(500, 25); x.fillText(e.name, bx + 28, by);
+    x.font = sans(600, 25); x.textAlign = 'right'; x.fillText(pct(r.s[e.k]) + '%', W - M, by); x.textAlign = 'left';
+  });
+  x.fillStyle = '#8A8CA3'; x.font = sans(400, 22);
+  x.fillText(S.date(new Date()), M, 1290);
+  return c.toDataURL('image/png');
+}
+$('#saveBtn').addEventListener('click', async () => {
+  const btn = $('#saveBtn'), label = btn.textContent;
+  btn.textContent = S.imgMaking; btn.disabled = true;
+  try { const url = await makeImage(lastRes); $('#shot').src = url; $('#dlLink').href = url; $('#overlay').hidden = false; $('#dlLink').focus(); }
+  catch (e) { btn.textContent = S.imgFail; setTimeout(() => { btn.textContent = label; }, 2400); btn.disabled = false; return; }
+  btn.textContent = label; btn.disabled = false;
+});
+const closeShot = () => { $('#overlay').hidden = true; $('#saveBtn').focus(); };
+$('#closeShot').addEventListener('click', closeShot);
+$('#overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeShot(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#overlay').hidden) closeShot(); });
+
+/* ---------------- navigation ---------------- */
+function groupReady() {
+  if (!API.ok || !API.cfg.groups || !API.cfg.groups.length) return true;
+  const v = $('#groupSel').value;
+  if (v) { st.group = v; save(); $('#groupNeed').hidden = true; return true; }
+  $('#groupNeed').hidden = false; $('#groupSel').focus(); return false;
+}
+$('#groupSel').addEventListener('change', () => { st.group = $('#groupSel').value; save(); if (st.group) $('#groupNeed').hidden = true; });
+$('#startBtn').addEventListener('click', () => {
+  if (!groupReady()) return;
+  if (answered() === ORDER.length) showResult(true); else startQuiz(false);
+});
+$('#restartBtn').addEventListener('click', () => { if (groupReady()) startQuiz(true); });
+$('#againBtn').addEventListener('click', () => { st.a = {}; st.p = 0; st.sub = null; st.t0 = null; save(); refreshIntro(); show('intro'); });
+$('#brand').addEventListener('click', () => { refreshIntro(); show('intro'); });
+
+/* ---------------- boot ---------------- */
+applyStatic();
+document.title = S.title;
+{ const md = $('meta[name="description"]'); if (md) md.content = S.desc; }
+{ const b = $('#langBtn'); b.textContent = I.OTHER_LANG.label; b.lang = I.OTHER_LANG.code; b.setAttribute('aria-label', S.langAria);
+  b.addEventListener('click', () => I.setLang(I.OTHER_LANG.code)); }
+renderLegend(); refreshIntro();
+$('#introInsp').textContent = INTRO_DEFAULT;
+let resumeTo = '';
+try { resumeTo = sessionStorage.getItem('ikigai-map:resume') || ''; sessionStorage.removeItem('ikigai-map:resume'); } catch (e) {}
+const unveil = () => document.documentElement.classList.remove('boot');
+if (resumeTo === 'result' && answered() === ORDER.length) { renderIntroMap(false); showResult(false); READY.then(unveil, unveil); }
+else { renderIntroMap(!I.reduceMotion); unveil(); I.lightUp(introSvg); }
+})();
+</script>
+</body>
+</html>

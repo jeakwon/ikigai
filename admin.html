@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이키가이 지도 대시보드</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#171A2B">
+<script>document.documentElement.classList.add('boot'); setTimeout(function () { document.documentElement.classList.remove('boot'); }, 2500);</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@200..700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+:root{
+  --night:#171A2B; --panel:#1C2034; --stage:#232842; --line:#2E3249; --grid:#2A2E45;
+  --text:#F1ECE4; --soft:#D7D4DF; --muted:#A9A8BA; --faint:#8A8CA3;
+  --core:#E9E1D3;
+  --serif:"Hahmlet","Noto Serif KR","AppleMyungjo","Batang",serif;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --wrap:1280px; --pad:clamp(16px,3vw,36px);
+}
+*{box-sizing:border-box}
+html{background:var(--night);color:var(--text)}
+body{margin:0;font:400 15px/1.6 var(--sans);-webkit-font-smoothing:antialiased;word-break:keep-all}
+button,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+html.boot body{visibility:hidden}
+.lang-corner{position:fixed;top:14px;right:var(--pad);z-index:30}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--pad)}
+.top{position:sticky;top:0;z-index:20;background:rgba(23,26,43,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px 20px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;font:500 17px/1.2 var(--serif)}
+.brand small{font:400 14px var(--sans);color:var(--muted)}
+.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13.5px;margin-left:auto}
+.status i{width:8px;height:8px;border-radius:50%;background:#0ca30c;box-shadow:0 0 8px #0ca30c}
+.status.bad i{background:#fab219;box-shadow:0 0 8px #fab219}
+.btn{appearance:none;border:0;border-radius:999px;padding:10px 18px;font:600 14.5px/1.1 var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:background .2s,box-shadow .2s}
+.btn.primary{background:var(--text);color:var(--night)}
+.btn.primary:hover{background:#fff}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--muted)}
+.btn:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+
+/* filters: one row above everything they scope */
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:22px 0 8px}
+.filters label{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+.seg{display:inline-flex;background:var(--panel);border-radius:999px;padding:3px}
+.seg button{appearance:none;border:0;background:transparent;border-radius:999px;padding:7px 14px;font-size:14px;color:var(--soft);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--stage);color:var(--text);box-shadow:inset 0 0 0 1px rgba(241,236,228,.25)}
+.filters select{appearance:none;background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23A9A8BA' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 12px center;border:0;border-radius:999px;padding:8px 34px 8px 14px;font-size:14px;color:var(--text)}
+
+/* KPI row */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:14px 0 26px}
+.kpi{background:var(--panel);border-radius:16px;padding:16px 18px 18px}
+.kpi .label{color:var(--muted);font-size:13.5px;margin:0 0 6px}
+.kpi .value{font:600 34px/1.1 var(--sans);letter-spacing:-.01em;margin:0}
+.kpi .sub{color:var(--faint);font-size:13px;margin:6px 0 0}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* panels */
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.grid.even{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:980px){.grid,.grid.even{grid-template-columns:1fr}}
+.panel{background:var(--panel);border-radius:18px;padding:20px 20px 18px;margin:0;min-width:0;position:relative}
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.panel h2{font:500 18px/1.3 var(--serif);margin:0}
+.panel .sub{color:var(--muted);font-size:13.5px;margin:4px 0 0;max-width:40em}
+.toggle{appearance:none;border:0;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 2px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.toggle:hover{color:var(--text)}
+.empty{color:var(--muted);padding:26px 0;text-align:center}
+.legend-line{color:var(--muted);font-size:13px;margin:10px 0 0}
+.lamp{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:none}
+.chips{display:inline-flex;gap:3px;flex:none}
+.chips i{width:7px;height:7px;border-radius:50%;box-shadow:inset 0 0 0 1.3px rgba(241,236,228,.35)}
+.chips i.on{background:var(--c)}
+
+/* everyone on the square map */
+.cloud{max-width:620px;margin:0 auto}
+.cloud .map{display:block;width:100%;height:auto;overflow:visible}
+.cloud .map text{pointer-events:none}
+.cloud .dot{cursor:pointer;transition:opacity .25s}
+.cloud .dot.dim{opacity:.14}
+.cloud .dot:hover .disc{stroke:#FFF4E2}
+.btn.small{padding:7px 12px;font-size:13px;white-space:nowrap}
+
+/* shape bars */
+.sbars{display:grid;gap:4px}
+.sgroup{color:var(--faint);font-size:12.5px;margin:10px 0 2px}
+.sgroup:first-child{margin-top:0}
+.sbar{display:grid;grid-template-columns:9.5em minmax(0,1fr) 6.2em;align-items:center;gap:12px;padding:4px 6px;border-radius:8px;cursor:pointer}
+.sbar:hover,.sbar.focus{background:rgba(241,236,228,.05)}
+.sbar.dim{opacity:.45}
+.sname{display:flex;align-items:center;gap:8px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strack{position:relative;height:14px}
+.sfill{position:absolute;left:0;top:0;bottom:0;background:var(--core);border-radius:0 4px 4px 0;min-width:0;transition:width .5s}
+.sval{text-align:right;color:var(--soft);font-size:13px;font-variant-numeric:tabular-nums}
+
+/* strips & histogram */
+svg text{font-family:var(--sans)}
+.hist{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;align-items:end;height:220px;padding-top:18px;border-bottom:1px solid var(--grid)}
+.hcol{position:relative;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:default}
+.hbar{width:min(24px,70%);background:var(--core);border-radius:4px 4px 0 0;transition:height .5s}
+.hval{font-size:12.5px;color:var(--soft);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.hcol:hover .hbar,.hcol:focus .hbar{background:#fff}
+.hlabels{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;margin-top:6px;color:var(--faint);font-size:12px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* tables */
+.tbl-wrap{overflow:auto;max-height:460px;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:500;position:sticky;top:0;background:var(--panel);z-index:1}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+.meter{display:inline-block;width:70px;height:6px;border-radius:99px;background:rgba(241,236,228,.1);vertical-align:middle;margin-left:8px;position:relative;overflow:hidden}
+.meter b{position:absolute;inset:0 auto 0 0;background:var(--c,var(--core));border-radius:99px}
+.rev{font-size:11.5px;color:var(--night);background:var(--muted);border-radius:4px;padding:1px 5px;margin-left:6px}
+.corr td.cell{text-align:center;font-variant-numeric:tabular-nums;min-width:4.5em}
+.corr th.rowh{position:static}
+
+/* tooltip */
+.tip{position:fixed;z-index:60;pointer-events:none;background:#262B45;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:260px}
+.tip strong{display:block;font-size:15px;font-weight:600}
+.tip .k{color:var(--muted)}
+.tip .row{display:flex;align-items:center;gap:8px}
+.tip .key{width:12px;height:2px;border-radius:2px;background:var(--c)}
+
+/* login & join screen */
+.login{max-width:420px;margin:12vh auto;padding:0 var(--pad)}
+.login h1{font:500 26px/1.3 var(--serif);margin:0 0 10px}
+.login p{color:var(--muted)}
+.login form{display:flex;gap:10px;margin-top:18px}
+.login input{flex:1;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text);font:inherit}
+.join{position:fixed;inset:0;z-index:70;background:var(--night);display:grid;place-items:center;padding:24px}
+.join-in{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:center;max-width:1100px}
+.qr{background:#fff;border-radius:24px;padding:18px;width:min(46vh,420px);aspect-ratio:1}
+.qr svg{display:block;width:100%;height:100%}
+.join h2{font:300 clamp(34px,4.5vw,58px)/1.15 var(--serif);margin:0 0 18px;letter-spacing:-.02em}
+.join .url{font:600 clamp(22px,2.6vw,34px)/1.3 var(--sans);margin:0 0 14px;word-break:break-all}
+.join p{color:var(--soft);font-size:18px;margin:0 0 10px}
+.join .count{font:600 22px var(--sans);color:var(--text);margin-top:26px}
+.join .close{position:absolute;top:22px;right:22px}
+.join select{background:var(--panel);border:0;border-radius:999px;padding:8px 14px;color:var(--text)}
+.join details{position:absolute;left:22px;bottom:18px;color:var(--faint);font-size:14px;max-width:min(560px,calc(100% - 44px))}
+.join summary{cursor:pointer}
+.join form{display:flex;gap:8px;margin-top:10px}
+.join input{flex:1;min-width:0;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;color:var(--text);font:inherit}
+.join .err{color:var(--soft);margin:6px 0 0}
+@media (max-width:760px){.join-in{grid-template-columns:1fr;justify-items:center;text-align:center}.qr{width:min(70vw,340px)}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<section class="login" id="login" hidden>
+  <button class="btn ghost lang-corner" type="button" data-lang-btn></button>
+  <h1 data-t="loginTitle">관리자 키를 넣어 주세요</h1>
+  <p id="loginHelp" data-t="loginHelp">서버를 켤 때 터미널에 나온 관리자 주소에 키가 들어 있어요. 서버 폴더의 data/admin_key.txt에도 저장돼 있어요.</p>
+  <form id="loginForm"><input id="keyInput" type="password" autocomplete="off" aria-label="관리자 키" placeholder="관리자 키" data-ta="keyAria" data-tp="keyAria"><button class="btn primary" type="submit" data-t="open">열기</button></form>
+  <p id="loginMsg" hidden data-t="loginMsg">키가 맞지 않아요. 다시 확인해 주세요.</p>
+  <p id="loginErr" hidden></p>
+</section>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand"><span data-t="brand">이키가이 지도 대시보드</span><small id="evTitle"></small></div>
+      <div class="status" id="status" aria-live="polite"><i></i><span id="statusText" data-t="loading">불러오는 중</span></div>
+      <a class="btn ghost" id="sheetLink" href="#" target="_blank" rel="noopener" hidden data-t="sheet">Google 시트 열기</a>
+      <button class="btn ghost" id="joinBtn" type="button" data-t="join">참여 화면 띄우기</button>
+      <button class="btn primary" id="csvBtn" type="button" data-t="csv">CSV 내려받기</button>
+      <button class="btn ghost" type="button" data-lang-btn></button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="filters" role="group" aria-label="보기 범위" data-ta="scopeAria">
+      <div class="seg" id="rangeSeg" role="group" aria-label="기간" data-ta="periodAria">
+        <button type="button" data-range="all" aria-pressed="true" data-t="rAll">전체 기간</button>
+        <button type="button" data-range="today" aria-pressed="false" data-t="rToday">오늘</button>
+        <button type="button" data-range="hour" aria-pressed="false" data-t="rHour">최근 1시간</button>
+      </div>
+      <label id="groupFilterBox" hidden><span data-t="fGroup">그룹</span> <select id="groupFilter"><option value="" data-t="fAll">전체</option></select></label>
+      <label><span data-t="fResp">응답</span> <select id="scopeFilter"><option value="latest" data-t="fLatest">사람마다 최신 응답만</option><option value="all" data-t="fAllResp">다시 한 응답까지 모두</option></select></label>
+    </div>
+
+    <section class="kpis" aria-label="요약" data-ta="kpiAria">
+      <div class="kpi"><p class="label" data-t="kN">참여자</p><p class="value" id="kN">0</p><p class="sub" id="kNsub"></p></div>
+      <div class="kpi"><p class="label" data-t="kR">응답</p><p class="value" id="kR">0</p><p class="sub" id="kRsub"></p></div>
+      <div class="kpi"><p class="label" data-t="kC">평균 이키가이 크기</p><p class="value" id="kC">-</p><p class="sub" id="kCsub"></p></div>
+      <div class="kpi"><p class="label" data-t="kS">가장 흔한 모양</p><p class="value" id="kS">-</p><p class="sub" id="kSsub"></p></div>
+    </section>
+
+    <div class="grid">
+      <figure class="panel">
+        <div class="panel-head">
+          <div><h2 data-t="cloudT">모두의 자리</h2><p class="sub" data-t="cloudSub">점 하나가 한 사람이에요. 각자 결과 화면에서 본 칸에 서 있고, 칸 안에서는 가장 가까운 이웃 칸 쪽으로 기울어 있어요. 점에 올리면 닉네임과 점수가 보여요.</p></div>
+          <a class="btn ghost small" id="mapLink" href="map.html" target="_blank" rel="noopener" data-t="openMap">크게 보기</a>
+        </div>
+        <div class="cloud" id="cloud"></div>
+        <p class="legend-line" id="cloudNote"></p>
+      </figure>
+      <figure class="panel">
+        <div class="panel-head">
+          <div><h2 data-t="shapesT">모양 분포</h2><p class="sub" data-t="shapesSub">막대에 올리거나 누르면 왼쪽 지도에서 그 모양의 사람들만 밝게 남아요.</p></div>
+          <button class="toggle" type="button" data-table="shapes" data-t="showTable">표로 보기</button>
+        </div>
+        <div id="shapes"></div>
+      </figure>
+    </div>
+
+    <div class="grid even">
+      <figure class="panel">
+        <div class="panel-head">
+          <div><h2 data-t="stripsT">네 빛의 분포</h2><p class="sub" id="stripSub" data-t="stripsSub">점 하나가 한 사람의 점수예요. 세로 막대는 평균이에요.</p></div>
+          <button class="toggle" type="button" data-table="strips" data-t="showTable">표로 보기</button>
+        </div>
+        <div id="strips"></div>
+      </figure>
+      <figure class="panel">
+        <div class="panel-head">
+          <div><h2 data-t="histT">이키가이 크기 분포</h2><p class="sub" id="histSub">네 빛이 모두 함께 닿는 크기(가장 약한 빛)를 10% 구간으로 나눴어요.</p></div>
+          <button class="toggle" type="button" data-table="hist" data-t="showTable">표로 보기</button>
+        </div>
+        <div id="hist"></div>
+      </figure>
+    </div>
+
+    <div class="grid even">
+      <figure class="panel">
+        <div class="panel-head"><div><h2 data-t="corrT">네 빛 사이의 상관</h2><p class="sub" data-t="corrSub">피어슨 상관계수 r이에요. 파란 칸은 함께 높아지는 경향, 붉은 칸은 반대로 움직이는 경향이에요.</p></div></div>
+        <div id="corr"></div>
+      </figure>
+      <figure class="panel" id="groupPanel">
+        <div class="panel-head"><div><h2 data-t="groupsT">그룹별 평균</h2><p class="sub" data-t="groupsSub">그룹마다 네 빛과 이키가이 크기의 평균이에요.</p></div></div>
+        <div id="groups"></div>
+      </figure>
+    </div>
+
+    <figure class="panel" style="margin-bottom:16px">
+      <div class="panel-head"><div><h2 data-t="itemsT">문항별 평균</h2><p class="sub" data-t="itemsSub">답한 값 그대로(1 전혀 아니다, 7 매우 그렇다)의 평균이에요. 역 표시가 있는 문항은 낮을수록 그 빛이 밝아져요.</p></div></div>
+      <div class="tbl-wrap" id="items"></div>
+    </figure>
+
+    <figure class="panel" style="margin-bottom:60px">
+      <div class="panel-head"><div><h2 data-t="listT">응답 목록</h2><p class="sub" data-t="listSub">최근 응답이 위에 있어요. 이름이나 연락처는 저장하지 않고, 닉네임은 참여자가 적은 그대로예요.</p></div></div>
+      <div class="tbl-wrap" id="list"></div>
+    </figure>
+  </main>
+</div>
+
+<div class="join" id="join" hidden role="dialog" aria-modal="true" aria-label="참여 안내 화면" data-ta="joinAria">
+  <button class="btn ghost close" id="joinClose" type="button" data-t="close">닫기</button>
+  <div class="join-in">
+    <div class="qr" id="qr"></div>
+    <div>
+      <h2 id="joinTitle">휴대폰 카메라로 QR을 찍어 참여해 주세요</h2>
+      <p class="url" id="joinUrl"></p>
+      <p id="joinWhere">같은 와이파이에 연결된 기기에서 열 수 있어요. 5분 정도 걸려요.</p>
+      <p id="joinPick" hidden><span data-t="joinPick">주소 고르기</span> <select id="joinSel"></select></p>
+      <p class="count" id="joinCount"></p>
+    </div>
+  </div>
+  <details id="joinMore">
+    <summary data-t="joinMore">다른 주소로 QR 만들기</summary>
+    <p data-t="joinMoreHelp">터널 주소(예: https://….trycloudflare.com)를 붙여 넣으면 그 주소로 QR을 바꿔요.</p>
+    <form id="joinForm" novalidate><input id="joinInput" type="url" inputmode="url" placeholder="https://" aria-label="QR에 넣을 주소" data-ta="joinInputAria"><button class="btn primary" type="submit" data-t="joinUpdate">QR 바꾸기</button></form>
+    <p class="err" id="joinErr" hidden data-t="joinErr">http:// 또는 https://로 시작하는 주소를 넣어 주세요.</p>
+  </details>
+</div>
+
+<div class="tip" id="tip" hidden></div>
+
+<script>window.addEventListener('error', function (e) { if (/config\.js/.test(e.filename || '')) window.IKIGAI_CONFIG_ERROR = 'syntax'; }, true);</script>
+<script>document.write('<script src="config.js' + (/^http/.test(location.protocol) ? '?v=' + Date.now() : '') + '" onerror="window.IKIGAI_CONFIG_ERROR=\'missing\'"><\/script>');</script>
+<script src="core.js"></script>
+<script src="qrcode.js"></script>
+<script>
+(() => {
+'use strict';
+const I = window.Ikigai, { EL, TYPES, QUESTIONS, SHAPE_ORDER, pct, members } = I;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const fmt1 = v => (Math.round(v * 10) / 10).toFixed(1);
+const chips = m => `<span class="chips" aria-hidden="true">${EL.map(e => `<i class="${m & e.bit ? 'on' : ''}" style="--c:${e.light}"></i>`).join('')}</span>`;
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : NaN;
+const sd = a => { if (a.length < 2) return NaN; const m = mean(a); return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); };
+const median = a => { if (!a.length) return NaN; const b = a.slice().sort((x, y) => x - y), h = b.length >> 1; return b.length % 2 ? b[h] : (b[h - 1] + b[h]) / 2; };
+function pearson(x, y) {
+  const n = x.length; if (n < 3) return NaN;
+  const mx = mean(x), my = mean(y); let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sxx += a * a; syy += b * b; }
+  return sxx && syy ? sxy / Math.sqrt(sxx * syy) : NaN;
+}
+/* ---------------- words ---------------- */
+const LG = I.LANG;
+const pickText = v => (v && typeof v === 'object' && !Array.isArray(v)) ? (v[LG] || v.ko || v.en || '') : (v || '');
+const NUM_LOCALE = LG === 'en' ? 'en-US' : 'ko-KR';
+const timeKo = d => d.toLocaleString(LG === 'en' ? 'en-GB' : 'ko-KR', { month:LG === 'en' ? 'short' : 'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+const STR = {
+  ko: {
+    title:'이키가이 지도 대시보드', langAria:'View in English',
+    loginHelpSheet:'Google Apps Script(Code.gs) 맨 위에 정한 ADMIN_KEY를 넣어 주세요.',
+    cfgMissing:'config.js 파일을 찾지 못했어요. admin.html과 같은 폴더에 config.js를 올렸는지 확인해 주세요.',
+    cfgSyntax:'config.js를 읽지 못했어요. 주소를 작은따옴표(\')로 감쌌는지, 줄 끝 쉼표(,)가 빠지지 않았는지 확인해 주세요.',
+    cfgShape:'collectUrl이 https://script.google.com/…/exec 모양이 아니에요. Apps Script 배포 관리에 있는 웹 앱 URL을 config.js에 넣어 주세요.',
+    sheetReadFail:'시트에서 응답을 읽지 못했어요.',
+    collectorDown:'수집기에 연결하지 못했어요. Apps Script 배포 설정이 ‘실행: 나’, ‘액세스: 모든 사용자’인지 확인해 주세요.',
+    serverDown:'서버에 연결하지 못했어요. server.py로 연 주소인지, 또는 config.js에 collectUrl이 들어 있는지 확인해 주세요.',
+    statusRetry:'서버에 연결하지 못했어요. 다시 시도하는 중', statusSheet:'방금 시트에서 갱신', statusLive:'실시간으로 갱신 중', statusAgo:s => `${s}초 전 갱신`,
+    showTable:'표로 보기', showChart:'그림으로 보기',
+    sizeIs:p => `이키가이 크기 ${p}%`,
+    cloudNote:n => `${n}명. 점이 한가운데 칸에 모일수록 네 빛이 고르게 닿은 사람이 많다는 뜻이에요.`,
+    empty:'아직 응답이 없어요.', emptyList:'아직 응답이 없어요. 위쪽의 참여 화면 띄우기로 QR 코드를 보여 주세요.',
+    groupIs:g => `${g} 그룹`, allGroups:'모든 그룹',
+    durMedian:m => `응답에 걸린 시간 중앙값 ${m}분`, medianIs:p => `중앙값 ${p}%`,
+    countPct:(c, p) => `${c}명, ${p}%`, people:c => `${c}명`, shapeAria:(name, c) => `${name} ${c}명`,
+    levels:['빛이 아직 없음', '한 가지 빛', '두 가지 빛', '세 가지 빛', '네 가지 빛'],
+    h:{ shape:'모양', light:'빛', people:'사람', share:'비율', mean:'평균', median:'중앙값', sd:'표준편차', on:'켜진 사람', size:'이키가이 크기',
+        group:'그룹', item:'문항', no:'번호', time:'시각', dur:'걸린 시간', nick:'닉네임' },
+    stripsAria:'네 빛 점수 분포', meanIs:p => `평균 ${p}%`,
+    histSub:'네 빛이 모두 함께 닿는 크기(가장 약한 빛)를 10% 구간으로 나눴어요.', histSubMean:m => `네 빛이 모두 함께 닿는 크기(가장 약한 빛)를 10% 구간으로 나눴어요. 평균 ${m}%.`,
+    bandAria:(l, c) => `${l}% 구간 ${c}명`, histAxis:'가로축은 이키가이 크기(%) 구간이에요.',
+    corrNeed:'세 명 이상 응답하면 계산해요.', corrFoot:n => `${n}명 기준. 응답이 적으면 값이 크게 흔들려요.`,
+    noGroup:'없음', rev:'역', revTitle:'역문항', minutes:m => `${m}분`,
+    listMore:'최근 500개만 보여요. 전체는 CSV로 내려받으세요.',
+    joinLocal:'같은 와이파이에 연결된 기기에서 열 수 있어요. 5분 정도 걸려요.',
+    joinAnywhere:'와이파이든 모바일 데이터든 어디서나 열 수 있어요. 5분 정도 걸려요.',
+    joinNoUrl:'참여 화면 주소가 아직 없어요', joinNoUrlHelp:'config.js의 participantUrl에 참여 화면을 올린 주소를 넣거나, 왼쪽 아래에 붙여 넣어 주세요.',
+    joinCount:n => `지금까지 ${n}명이 참여했어요.`,
+    joinTitle:t => t ? `${t}, 휴대폰 카메라로 QR을 찍어 참여해 주세요` : '휴대폰 카메라로 QR을 찍어 참여해 주세요',
+  },
+  en: {
+    title:'Ikigai Map dashboard', langAria:'한국어로 보기',
+    loginHelpSheet:'Enter the ADMIN_KEY set at the top of the Google Apps Script (Code.gs).',
+    cfgMissing:'config.js wasn\'t found. Check that config.js is in the same folder as admin.html.',
+    cfgSyntax:'config.js couldn\'t be read. Check that the address is wrapped in single quotes (\') and that no comma (,) is missing at the end of a line.',
+    cfgShape:'collectUrl doesn\'t look like https://script.google.com/…/exec. Put the web app URL from Manage deployments in Apps Script into config.js.',
+    sheetReadFail:'Couldn\'t read responses from the sheet.',
+    collectorDown:'Couldn\'t reach the collector. Check that the Apps Script deployment is set to Execute as: Me and Who has access: Anyone.',
+    serverDown:'Couldn\'t reach the server. Check that this page was opened from server.py, or that config.js has a collectUrl.',
+    statusRetry:'Can\'t reach the server. Retrying', statusSheet:'Just updated from the sheet', statusLive:'Updating live', statusAgo:s => `Updated ${s}s ago`,
+    showTable:'Show table', showChart:'Show chart',
+    sizeIs:p => `Ikigai size ${p}%`,
+    cloudNote:n => `${n} ${n === 1 ? 'person' : 'people'}. The more dots gather in the middle cell, the more people have all four lights reaching them evenly.`,
+    empty:'No responses yet.', emptyList:'No responses yet. Use Show join screen at the top to put the QR code on screen.',
+    groupIs:g => `Group: ${g}`, allGroups:'All groups',
+    durMedian:m => `Median time ${m} min`, medianIs:p => `Median ${p}%`,
+    countPct:(c, p) => `${c} (${p}%)`, people:c => String(c), shapeAria:(name, c) => `${name}, ${c} ${c === 1 ? 'person' : 'people'}`,
+    levels:['No light yet', 'One light', 'Two lights', 'Three lights', 'Four lights'],
+    h:{ shape:'Shape', light:'Light', people:'People', share:'Share', mean:'Mean', median:'Median', sd:'SD', on:'On for', size:'Ikigai size',
+        group:'Group', item:'Statement', no:'No.', time:'Time', dur:'Duration', nick:'Nickname' },
+    stripsAria:'Distribution of the four light scores', meanIs:p => `Mean ${p}%`,
+    histSub:'The size all four lights reach together (the weakest light), in 10% bands.', histSubMean:m => `The size all four lights reach together (the weakest light), in 10% bands. Mean ${m}%.`,
+    bandAria:(l, c) => `${l}% band, ${c} ${c === 1 ? 'person' : 'people'}`, histAxis:'The horizontal axis shows ikigai size (%) bands.',
+    corrNeed:'Shown once three or more people have responded.', corrFoot:n => `Based on ${n} people. With few responses, the values swing a lot.`,
+    noGroup:'None', rev:'R', revTitle:'Reverse-scored', minutes:m => `${m} min`,
+    listMore:'Showing the latest 500. Download the CSV for all of them.',
+    joinLocal:'Open it on a device on the same Wi-Fi. It takes about 5 minutes.',
+    joinAnywhere:'Open it anywhere, on Wi-Fi or mobile data. It takes about 5 minutes.',
+    joinNoUrl:'No join address yet', joinNoUrlHelp:'Put the address where the survey is hosted in participantUrl in config.js, or paste it below on the left.',
+    joinCount:n => `${n} ${n === 1 ? 'person has' : 'people have'} taken part so far.`,
+    joinTitle:t => t ? `${t}: scan the QR code with your phone camera to join` : 'Scan the QR code with your phone camera to join',
+  },
+};
+const S = STR[LG];
+const STATIC_EN = {
+  loginTitle:'Enter the admin key', loginHelp:'The key is in the admin address printed in the terminal when the server started. It\'s also saved in data/admin_key.txt in the server folder.',
+  keyAria:'Admin key', open:'Open', loginMsg:'That key doesn\'t match. Please check it and try again.',
+  brand:'Ikigai Map dashboard', loading:'Loading', sheet:'Open Google Sheet', join:'Show join screen', csv:'Download CSV',
+  scopeAria:'Scope', periodAria:'Period', rAll:'All time', rToday:'Today', rHour:'Last hour',
+  fGroup:'Group', fAll:'All', fResp:'Responses', fLatest:'Latest per person', fAllResp:'Include retakes',
+  kpiAria:'Summary', kN:'Participants', kR:'Responses', kC:'Average ikigai size', kS:'Most common shape',
+  cloudT:'Where everyone stands', cloudSub:'Each dot is one person, standing in the cell they saw on their result and leaning toward their nearest neighbouring cell. Hover over a dot for the nickname and scores.',
+  openMap:'Full screen',
+  shapesT:'Shapes', shapesSub:'Hover over or tap a bar to keep only the people with that shape lit on the map to the left.', showTable:'Show table',
+  stripsT:'The four lights', stripsSub:'Each dot is one person\'s score. The vertical bar is the mean.',
+  histT:'Ikigai size',
+  corrT:'Correlations between the lights', corrSub:'Pearson\'s r. Blue cells tend to rise together; red cells tend to move in opposite directions.',
+  groupsT:'Averages by group', groupsSub:'The mean of the four lights and the ikigai size in each group.',
+  itemsT:'Averages by statement', itemsSub:'The mean raw answer (1 strongly disagree, 7 strongly agree). For statements marked R, lower answers make that light brighter.',
+  listT:'Responses', listSub:'Newest first. No names or contact details are stored; nicknames are exactly what participants typed.',
+  joinAria:'Join screen', close:'Close', joinPick:'Address', joinMore:'Make a QR code for another address',
+  joinMoreHelp:'Paste a tunnel address (for example https://….trycloudflare.com) to switch the QR code to it.',
+  joinInputAria:'Address for the QR code', joinUpdate:'Update QR', joinErr:'Enter an address that starts with http:// or https://.',
+};
+function applyStatic() {
+  document.title = S.title;
+  $$('[data-lang-btn]').forEach(b => {
+    b.textContent = I.OTHER_LANG.label; b.lang = I.OTHER_LANG.code; b.setAttribute('aria-label', S.langAria);
+    b.addEventListener('click', () => I.setLang(I.OTHER_LANG.code));
+  });
+  if (LG !== 'en') return;
+  $$('[data-t]').forEach(el => { const v = STATIC_EN[el.dataset.t]; if (v != null) el.textContent = v; });
+  $$('[data-ta]').forEach(el => { const v = STATIC_EN[el.dataset.ta]; if (v != null) el.setAttribute('aria-label', v); });
+  $$('[data-tp]').forEach(el => { const v = STATIC_EN[el.dataset.tp]; if (v != null) el.placeholder = v; });
+}
+applyStatic();
+
+/* ---------------- key ---------------- */
+let KEY = '';
+try {
+  const q = new URLSearchParams(location.search).get('key');
+  if (q) { sessionStorage.setItem('ikigai-admin-key', q); history.replaceState(null, '', location.pathname); }
+  KEY = q || sessionStorage.getItem('ikigai-admin-key') || '';
+} catch (e) {}
+$('#loginForm').addEventListener('submit', e => {
+  e.preventDefault(); KEY = $('#keyInput').value.trim();
+  try { sessionStorage.setItem('ikigai-admin-key', KEY); } catch (_) {}
+  load(true);
+});
+
+/* ---------------- data ----------------
+   server: read from server.py. sheet: read from the Google Apps Script address in config.js. */
+const CFG = Object.assign({ collectUrl:'', participantUrl:'', title:'', groups:[], notice:'', publicStats:true }, window.IKIGAI_CONFIG || {});
+const SHEET = !!CFG.collectUrl;
+if (SHEET) $('#loginHelp').textContent = S.loginHelpSheet;
+const CFG_PROBLEM = !window.IKIGAI_CONFIG
+  ? (window.IKIGAI_CONFIG_ERROR === 'missing' ? S.cfgMissing : S.cfgSyntax)
+  : (SHEET && !/^https:\/\/script\.google\.com\/.+\/exec(\?.*)?$/.test(CFG.collectUrl.trim()) && !/^http:\/\/(localhost|127\.)/.test(CFG.collectUrl)
+      ? S.cfgShape : '');
+let RAW = [], INFO = null, sig = '', failures = 0, lastOk = 0;
+const F = { range:'all', group:'', scope:'latest', focus:null, tables:{} };
+async function fetchData() {
+  if (SHEET) {
+    const u = CFG.collectUrl + (CFG.collectUrl.includes('?') ? '&' : '?') + 'action=data&key=' + encodeURIComponent(KEY);
+    const r = await fetch(u, { cache:'no-store', redirect:'follow' });
+    const j = await r.json();
+    if (!j.ok && j.error === 'forbidden') return { denied:true };
+    if (!j.ok) return { error:j.error || S.sheetReadFail };
+    j.info = { title:CFG.title, groups:CFG.groups || [], urls:CFG.participantUrl ? [CFG.participantUrl] : [], sheetUrl:(j.info || {}).sheetUrl || '' };
+    return { json:j };
+  }
+  const r = await fetch('api/admin/data', { headers:{ 'X-Admin-Key':KEY }, cache:'no-store' });
+  if (r.status === 403) return { denied:true };
+  const j = await r.json(); if (!j.ok) throw new Error(j.error);
+  return { json:j };
+}
+async function load(first) {
+  try {
+    const got = await fetchData();
+    if (got.denied) { $('#app').hidden = true; $('#login').hidden = false; $('#loginMsg').hidden = !KEY; $('#loginErr').hidden = true; return; }
+    if (got.error) { $('#app').hidden = true; $('#login').hidden = false; $('#loginMsg').hidden = true; $('#loginErr').textContent = got.error; $('#loginErr').hidden = false; return; }
+    const j = got.json;
+    $('#login').hidden = true; $('#app').hidden = false;
+    INFO = j.info; failures = 0; lastOk = Date.now();
+    const s = j.rows.length + ':' + (j.rows.length ? j.rows[j.rows.length - 1].id : 0);
+    if (s !== sig || first) {
+      sig = s;
+      RAW = j.rows.map(r => Object.assign({ id:r.id, t:new Date(r.t), c:r.c, g:r.g, a:r.a, d:r.d, n:r.n || '', l:r.l || '' }, I.analyze(r.a)));
+      setupInfo(); render();
+    }
+  } catch (e) {
+    failures++;
+    if (!INFO) {   // never reached anything: say so instead of leaving a blank page
+      $('#app').hidden = true; $('#login').hidden = false; $('#loginMsg').hidden = true;
+      $('#loginErr').textContent = CFG_PROBLEM || (SHEET ? S.collectorDown : S.serverDown);
+      $('#loginErr').hidden = false;
+    }
+  }
+  paintStatus();
+}
+function paintStatus() {
+  const box = $('#status'), t = $('#statusText');
+  if (failures > 0) { box.classList.add('bad'); t.textContent = S.statusRetry; return; }
+  box.classList.remove('bad');
+  const s = Math.round((Date.now() - lastOk) / 1000);
+  t.textContent = s < 3 ? (SHEET ? S.statusSheet : S.statusLive) : S.statusAgo(s);
+}
+setInterval(() => load(false), SHEET ? 10000 : 5000);
+setInterval(paintStatus, 1000);
+
+let infoDone = false;
+function setupInfo() {
+  if (infoDone || !INFO) return; infoDone = true;
+  $('#evTitle').textContent = pickText(INFO.title);
+  if (INFO.sheetUrl) { $('#sheetLink').href = INFO.sheetUrl; $('#sheetLink').hidden = false; }
+  if (INFO.groups && INFO.groups.length) {
+    const sel = $('#groupFilter');
+    INFO.groups.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o); });
+    $('#groupFilterBox').hidden = false;
+  }
+}
+function scoped() {
+  let rows = RAW;
+  if (F.group) rows = rows.filter(r => r.g === F.group);
+  if (F.range === 'today') { const d0 = new Date(); d0.setHours(0, 0, 0, 0); rows = rows.filter(r => r.t >= d0); }
+  if (F.range === 'hour') { const t0 = Date.now() - 3600e3; rows = rows.filter(r => r.t.getTime() >= t0); }
+  const all = rows;
+  if (F.scope === 'latest') { const m = new Map(); for (const r of rows) m.set(r.c, r); rows = Array.from(m.values()).sort((a, b) => a.id - b.id); }
+  return { rows, all };
+}
+
+/* ---------------- filters ---------------- */
+$$('#rangeSeg button').forEach(b => b.addEventListener('click', () => {
+  F.range = b.dataset.range; $$('#rangeSeg button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); render();
+}));
+$('#groupFilter').addEventListener('change', e => { F.group = e.target.value; render(); });
+$('#scopeFilter').addEventListener('change', e => { F.scope = e.target.value; render(); });
+$$('[data-table]').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.table; F.tables[k] = !F.tables[k]; b.textContent = F.tables[k] ? S.showChart : S.showTable; render();
+}));
+
+/* ---------------- tooltip ---------------- */
+const tip = $('#tip');
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 10, x + 14) + 'px';
+  tip.style.top = Math.max(10, Math.min(window.innerHeight - h - 10, y + 14)) + 'px';
+}
+const hideTip = () => { tip.hidden = true; };
+function personTip(r) {
+  const rows = EL.map(e => `<div class="row"><span class="key" style="--c:${e.chart}"></span><b>${pct(r.s[e.k])}%</b><span class="k">${e.name}</span></div>`).join('');
+  const head = r.n ? `<strong>${esc(r.n)}</strong><div class="k">${esc(TYPES[r.shape].name)}</div>` : `<strong>${esc(TYPES[r.shape].name)}</strong>`;
+  return `${head}<div class="k">${S.sizeIs(pct(r.core))}${r.g ? `, ${esc(r.g)}` : ''}</div>${rows}<div class="k">${timeKo(r.t)}</div>`;
+}
+
+/* ---------------- everyone on the square map ---------------- */
+let cloudRows = [];
+function setCloudFocus(m) { $$('#cloud .dot').forEach(d => d.classList.toggle('dim', m != null && +d.dataset.m !== m)); }
+function renderCloud(rows) {
+  cloudRows = rows;
+  const pts = I.crowdLayout(rows.map(r => ({ s:r.s, shape:r.shape })));
+  $('#cloud').innerHTML = I.buildMap('cloud', { crowd:pts.map((p, i) => ({ x:p.x, y:p.y, r:p.r, m:rows[i].shape })) });
+  $$('#cloud .dot').forEach(d => {
+    const r = cloudRows[+d.dataset.i];
+    d.addEventListener('pointerenter', ev => showTip(personTip(r), ev.clientX, ev.clientY));
+    d.addEventListener('pointermove', ev => showTip(personTip(r), ev.clientX, ev.clientY));
+    d.addEventListener('pointerleave', hideTip);
+  });
+  setCloudFocus(F.focus);
+  const n = rows.length;
+  $('#cloudNote').textContent = n ? S.cloudNote(n) : S.empty;
+}
+// the full-screen map opens with the same key, carried after # so it never reaches a server log
+$('#mapLink').addEventListener('click', () => { $('#mapLink').href = `map.html?lang=${LG}#key=${encodeURIComponent(KEY)}`; });
+
+/* ---------------- KPIs ---------------- */
+function renderKPI(rows, all) {
+  const people = new Set(all.map(r => r.c)).size;
+  $('#kN').textContent = people.toLocaleString(NUM_LOCALE);
+  $('#kNsub').textContent = F.group ? S.groupIs(F.group) : (INFO && INFO.groups.length ? S.allGroups : '');
+  $('#kR').textContent = all.length.toLocaleString(NUM_LOCALE);
+  const dur = all.map(r => r.d).filter(v => v != null && v > 0);
+  $('#kRsub').textContent = dur.length ? S.durMedian(Math.round(median(dur) / 60 * 10) / 10) : '';
+  if (!rows.length) { $('#kC').textContent = '-'; $('#kCsub').textContent = ''; $('#kS').textContent = '-'; $('#kSsub').textContent = ''; return; }
+  const cores = rows.map(r => r.core);
+  $('#kC').textContent = pct(mean(cores)) + '%';
+  $('#kCsub').textContent = S.medianIs(pct(median(cores)));
+  const cnt = {}; rows.forEach(r => { cnt[r.shape] = (cnt[r.shape] || 0) + 1; });
+  const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0];
+  $('#kS').textContent = TYPES[top[0]].name;
+  $('#kSsub').textContent = S.countPct(top[1], Math.round(top[1] / rows.length * 100));
+}
+
+/* ---------------- shapes ---------------- */
+function renderShapes(rows) {
+  const box = $('#shapes'), n = rows.length;
+  if (!n) { box.innerHTML = `<p class="empty">${S.empty}</p>`; return; }
+  const cnt = {}; rows.forEach(r => { cnt[r.shape] = (cnt[r.shape] || 0) + 1; });
+  const order = SHAPE_ORDER.concat(cnt[0] ? [0] : []);
+  const max = Math.max(...order.map(m => cnt[m] || 0), 1);
+  const groupOf = m => S.levels[m === 0 ? 0 : I.level(m)];
+  if (F.tables.shapes) {
+    box.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>${S.h.shape}</th><th>${S.h.light}</th><th class="num">${S.h.people}</th><th class="num">${S.h.share}</th></tr></thead><tbody>${order.map(m =>
+      `<tr><td>${chips(m)} ${TYPES[m].name}</td><td>${groupOf(m)}</td><td class="num">${cnt[m] || 0}</td><td class="num">${Math.round((cnt[m] || 0) / n * 100)}%</td></tr>`).join('')}</tbody></table></div>`;
+    return;
+  }
+  let last = '', html = '';
+  for (const m of order) {
+    const g = groupOf(m); if (g !== last) { html += `<div class="sgroup">${g}</div>`; last = g; }
+    const c = cnt[m] || 0, cls = F.focus === m ? ' focus' : (F.focus != null ? ' dim' : '');
+    html += `<div class="sbar${cls}" data-m="${m}" tabindex="0" role="button" aria-pressed="${F.focus === m}" aria-label="${S.shapeAria(TYPES[m].name, c)}">
+      <span class="sname">${chips(m)}${TYPES[m].name}</span>
+      <span class="strack"><span class="sfill" style="width:${c / max * 100}%"></span></span>
+      <span class="sval">${S.countPct(c, Math.round(c / n * 100))}</span></div>`;
+  }
+  box.innerHTML = `<div class="sbars">${html}</div>`;
+  $$('.sbar', box).forEach(el => {
+    const m = +el.dataset.m;
+    el.addEventListener('mouseenter', () => setCloudFocus(m));
+    el.addEventListener('mouseleave', () => setCloudFocus(F.focus));
+    el.addEventListener('focus', () => setCloudFocus(m));
+    el.addEventListener('blur', () => setCloudFocus(F.focus));
+    const toggle = () => { F.focus = F.focus === m ? null : m; render(); };
+    el.addEventListener('click', toggle);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+}
+
+/* ---------------- strips: one row per light ---------------- */
+function renderStrips(rows) {
+  const box = $('#strips');
+  if (!rows.length) { box.innerHTML = `<p class="empty">${S.empty}</p>`; return; }
+  if (F.tables.strips) {
+    box.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>${S.h.light}</th><th class="num">${S.h.mean}</th><th class="num">${S.h.median}</th><th class="num">${S.h.sd}</th><th class="num">${S.h.on}</th></tr></thead><tbody>${EL.map(e => {
+      const v = rows.map(r => r.s[e.k]), on = rows.filter(r => r.shape & e.bit).length;
+      return `<tr><td><span class="lamp" style="--c:${e.chart}"></span> ${e.name}</td><td class="num">${pct(mean(v))}%</td><td class="num">${pct(median(v))}%</td><td class="num">${pct(sd(v) || 0)}%p</td><td class="num">${S.people(on)}</td></tr>`;
+    }).join('')}</tbody></table></div>`;
+    return;
+  }
+  const W = Math.max(300, box.clientWidth || 520), rowH = 52, L = 132, R = 74, H = rowH * EL.length + 26;
+  const x = v => L + v * (W - L - R);
+  const jit = id => (((id * 2654435761) >>> 0) % 1000) / 1000 - 0.5;
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${S.stripsAria}">`;
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) svg += `<line x1="${x(t)}" x2="${x(t)}" y1="0" y2="${rowH * EL.length}" stroke="#2A2E45" stroke-width="1"/><text x="${x(t)}" y="${H - 6}" text-anchor="middle" font-size="12" fill="#8A8CA3">${t * 100}%</text>`;
+  EL.forEach((e, i) => {
+    const cy = i * rowH + rowH / 2, vals = rows.map(r => r.s[e.k]), m = mean(vals);
+    svg += `<circle cx="14" cy="${cy}" r="4.5" fill="${e.chart}"/><text x="26" y="${cy + 4.5}" font-size="13.5" fill="#F1ECE4">${e.name}</text>`;
+    rows.forEach(r => { svg += `<circle cx="${x(r.s[e.k]).toFixed(1)}" cy="${(cy + jit(r.id + i * 7919) * 22).toFixed(1)}" r="4" fill="${e.chart}" stroke="#1C2034" stroke-width="2" opacity=".9"/>`; });
+    svg += `<line x1="${x(m)}" x2="${x(m)}" y1="${cy - 17}" y2="${cy + 17}" stroke="#F1ECE4" stroke-width="2" stroke-linecap="round"/>`;
+    svg += `<text x="${W - 4}" y="${cy + 4.5}" text-anchor="end" font-size="13" fill="#D7D4DF">${S.meanIs(pct(m))}</text>`;
+  });
+  svg += '</svg>';
+  box.innerHTML = svg;
+  const el = $('svg', box);
+  el.addEventListener('pointermove', ev => {
+    const rc = el.getBoundingClientRect(), mx = ev.clientX - rc.left, my = ev.clientY - rc.top, i = Math.floor(my / rowH);
+    if (i < 0 || i >= EL.length) { hideTip(); return; }
+    const e = EL[i]; let best = null, bd = 12;
+    rows.forEach(r => { const d = Math.abs(x(r.s[e.k]) - mx); if (d < bd) { bd = d; best = r; } });
+    if (!best) { hideTip(); return; }
+    showTip(`<strong>${pct(best.s[e.k])}%</strong><div class="k">${e.name}</div><div class="k">${best.n ? esc(best.n) + ', ' : ''}${esc(TYPES[best.shape].name)}, ${S.sizeIs(pct(best.core))}</div>`, ev.clientX, ev.clientY);
+  });
+  el.addEventListener('pointerleave', hideTip);
+}
+
+/* ---------------- histogram of ikigai size ---------------- */
+function renderHist(rows) {
+  const box = $('#hist');
+  if (!rows.length) { box.innerHTML = `<p class="empty">${S.empty}</p>`; $('#histSub').textContent = S.histSub; return; }
+  const bins = new Array(10).fill(0); rows.forEach(r => { bins[Math.min(9, Math.floor(r.core * 10))]++; });
+  const max = Math.max(...bins, 1), labels = bins.map((_, i) => `${i * 10}–${i * 10 + 10}`);
+  $('#histSub').textContent = S.histSubMean(pct(mean(rows.map(r => r.core))));
+  if (F.tables.hist) {
+    box.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>${S.h.size}</th><th class="num">${S.h.people}</th><th class="num">${S.h.share}</th></tr></thead><tbody>${bins.map((c, i) =>
+      `<tr><td>${labels[i]}%</td><td class="num">${c}</td><td class="num">${Math.round(c / rows.length * 100)}%</td></tr>`).join('')}</tbody></table></div>`;
+    return;
+  }
+  box.innerHTML = `<div class="hist">${bins.map((c, i) => `<div class="hcol" tabindex="0" aria-label="${S.bandAria(labels[i], c)}" data-i="${i}">${c ? `<span class="hval">${c}</span>` : ''}<span class="hbar" style="height:calc(${c / max} * (100% - 24px))"></span></div>`).join('')}</div>
+    <div class="hlabels">${labels.map(l => `<span>${l}</span>`).join('')}</div><p class="legend-line">${S.histAxis}</p>`;
+  $$('.hcol', box).forEach(col => {
+    const i = +col.dataset.i, txt = `<strong>${S.people(bins[i])}</strong><div class="k">${S.sizeIs(labels[i])}</div>`;
+    col.addEventListener('pointermove', ev => showTip(txt, ev.clientX, ev.clientY));
+    col.addEventListener('pointerleave', hideTip);
+    col.addEventListener('focus', () => { const rc = col.getBoundingClientRect(); showTip(txt, rc.left, rc.top); });
+    col.addEventListener('blur', hideTip);
+  });
+}
+
+/* ---------------- correlation ---------------- */
+function renderCorr(rows) {
+  const box = $('#corr');
+  if (rows.length < 3) { box.innerHTML = `<p class="empty">${S.corrNeed}</p>`; return; }
+  const col = r => isNaN(r) ? 'transparent' : r >= 0 ? `rgba(57,135,229,${Math.abs(r) * 0.6})` : `rgba(230,103,103,${Math.abs(r) * 0.6})`;
+  let html = `<table class="corr"><thead><tr><th></th>${EL.slice(0, 3).map(e => `<th class="num">${e.short}</th>`).join('')}</tr></thead><tbody>`;
+  EL.slice(1).forEach((a, i) => {
+    html += `<tr><th class="rowh"><span class="lamp" style="--c:${a.chart}"></span> ${a.name}</th>`;
+    EL.slice(0, 3).forEach((b, j) => {
+      if (j > i) { html += '<td></td>'; return; }
+      const r = pearson(rows.map(x => x.s[a.k]), rows.map(x => x.s[b.k]));
+      html += `<td class="cell" style="background:${col(r)}">${isNaN(r) ? '-' : r.toFixed(2)}</td>`;
+    });
+    html += '</tr>';
+  });
+  box.innerHTML = html + `</tbody></table><p class="legend-line">${S.corrFoot(rows.length)}</p>`;
+}
+
+/* ---------------- groups ---------------- */
+function renderGroups(rows) {
+  const panel = $('#groupPanel'), box = $('#groups');
+  const names = (INFO && INFO.groups) || [];
+  if (!names.length) { panel.hidden = true; return; }
+  panel.hidden = false;
+  const list = names.concat(rows.some(r => !r.g) ? [''] : []);
+  box.innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>${S.h.group}</th><th class="num">${S.h.people}</th>${EL.map(e => `<th class="num">${e.short}</th>`).join('')}<th class="num">${S.h.size}</th></tr></thead><tbody>${list.map(g => {
+    const rs = rows.filter(r => r.g === g);
+    if (!rs.length) return `<tr><td>${esc(g || S.noGroup)}</td><td class="num">0</td>${EL.map(() => '<td class="num">-</td>').join('')}<td class="num">-</td></tr>`;
+    return `<tr><td>${esc(g || S.noGroup)}</td><td class="num">${rs.length}</td>${EL.map(e => `<td class="num">${pct(mean(rs.map(r => r.s[e.k])))}%</td>`).join('')}<td class="num">${pct(mean(rs.map(r => r.core)))}%<span class="meter"><b style="width:${pct(mean(rs.map(r => r.core)))}%"></b></span></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+/* ---------------- items ---------------- */
+function renderItems(rows) {
+  const box = $('#items');
+  if (!rows.length) { box.innerHTML = `<p class="empty">${S.empty}</p>`; return; }
+  box.innerHTML = `<table><thead><tr><th>${S.h.item}</th><th>${S.h.light}</th><th class="num">${S.h.mean}</th><th class="num">${S.h.sd}</th></tr></thead><tbody>${QUESTIONS.map(q => {
+    const v = rows.map(r => r.a[q.id]).filter(Boolean), e = I.ELK[q.d], m = mean(v);
+    return `<tr><td>${esc(q.t)}${q.r ? `<span class="rev" title="${S.revTitle}">${S.rev}</span>` : ''}</td><td><span class="lamp" style="--c:${e.chart}"></span> ${e.short}</td>
+      <td class="num">${fmt1(m)}<span class="meter" style="--c:${e.chart}"><b style="width:${(m - 1) / 6 * 100}%"></b></span></td><td class="num">${fmt1(sd(v) || 0)}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+/* ---------------- response list ---------------- */
+function renderList(rows) {
+  const box = $('#list');
+  if (!rows.length) { box.innerHTML = `<p class="empty">${S.emptyList}</p>`; return; }
+  const hasG = INFO && INFO.groups.length, hasN = rows.some(r => r.n);
+  const shown = rows.slice().reverse().slice(0, 500);
+  box.innerHTML = `<table><thead><tr><th class="num">${S.h.no}</th><th>${S.h.time}</th>${hasN ? `<th>${S.h.nick}</th>` : ''}${hasG ? `<th>${S.h.group}</th>` : ''}<th>${S.h.shape}</th><th class="num">${S.h.size}</th>${EL.map(e => `<th class="num">${e.short}</th>`).join('')}<th class="num">${S.h.dur}</th></tr></thead><tbody>${shown.map(r =>
+    `<tr><td class="num">${r.id}</td><td>${timeKo(r.t)}</td>${hasN ? `<td>${esc(r.n || '-')}</td>` : ''}${hasG ? `<td>${esc(r.g || '-')}</td>` : ''}<td>${chips(r.shape)} ${TYPES[r.shape].name}</td><td class="num">${pct(r.core)}%</td>${EL.map(e => `<td class="num">${pct(r.s[e.k])}%</td>`).join('')}<td class="num">${r.d ? S.minutes(Math.round(r.d / 60 * 10) / 10) : '-'}</td></tr>`).join('')}</tbody></table>${rows.length > 500 ? `<p class="legend-line">${S.listMore}</p>` : ''}`;
+}
+
+/* ---------------- render all ---------------- */
+function render() {
+  const { rows, all } = scoped();
+  renderKPI(rows, all); renderCloud(rows); renderShapes(rows); renderStrips(rows); renderHist(rows);
+  renderCorr(rows); renderGroups(rows); renderItems(rows); renderList(rows);
+  if ($('#join') && !$('#join').hidden) paintJoinCount();
+}
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (RAW.length) renderStrips(scoped().rows); }, 150); });
+
+/* ---------------- CSV ---------------- */
+function csvText(rows) {
+  const QIDS = QUESTIONS.map(q => q.id).sort((a, b) => 'LGNP'.indexOf(a[0]) - 'LGNP'.indexOf(b[0]) || a.slice(1) - b.slice(1));
+  const head = ['id', 'created_at_utc', 'group', 'participant', 'nickname', 'lang', 'duration_sec', 'love', 'good', 'need', 'paid', 'shape_code', 'shape_label', 'shape_name', 'lights_on', 'ikigai_size', 'max_light'].concat(QIDS);
+  const cell = v => { const t = String(v == null ? '' : v); return /[",\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+  const text = v => { const t = String(v == null ? '' : v); return /^[=+\-@\t\r]/.test(t) ? "'" + t : t; };
+  const alias = new Map(), r4 = v => Math.round(v * 10000) / 10000;
+  const lines = [head.join(',')];
+  for (const r of rows) {
+    if (!alias.has(r.c)) alias.set(r.c, 'P' + String(alias.size + 1).padStart(3, '0'));
+    lines.push([r.id, r.t.toISOString().replace(/\.\d{3}Z$/, '+00:00'), text(r.g), alias.get(r.c), text(r.n), r.l, r.d == null ? '' : Math.round(r.d * 10) / 10,
+      r4(r.s.L), r4(r.s.G), r4(r.s.N), r4(r.s.P), r.shape, I.shapeLabel(r.shape), TYPES[r.shape].name, I.level(r.shape), r4(r.core),
+      r4(Math.max(r.s.L, r.s.G, r.s.N, r.s.P))].concat(QIDS.map(q => r.a[q])).map(cell).join(','));
+  }
+  return '\ufeff' + lines.join('\r\n') + '\r\n';
+}
+$('#csvBtn').addEventListener('click', () => {
+  const a = document.createElement('a');
+  if (SHEET) {
+    const d = new Date(), stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}`;
+    a.href = URL.createObjectURL(new Blob([csvText(RAW)], { type:'text/csv;charset=utf-8' })); a.download = `ikigai-responses-${stamp}.csv`;
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } else { a.href = 'api/admin/export.csv?key=' + encodeURIComponent(KEY) + '&lang=' + LG; a.download = ''; }
+  document.body.appendChild(a); a.click(); a.remove();
+});
+
+/* ---------------- join screen (QR) ---------------- */
+const isLocalNet = u => { try { return new URL(u).protocol === 'http:'; } catch (e) { return true; } };   // tunnels give https, the laptop's own address is http
+let extraUrls = [];
+function drawQR(url) {
+  const qr = qrcode(0, 'M'); qr.addData(url); qr.make();
+  $('#qr').innerHTML = qr.createSvgTag({ cellSize:8, margin:0, scalable:true });
+  $('#joinUrl').textContent = url;
+  $('#joinWhere').textContent = isLocalNet(url) ? S.joinLocal : S.joinAnywhere;
+}
+function fillJoinList(selected) {
+  const known = (INFO && INFO.urls && INFO.urls.length) ? INFO.urls : (/^https?:/.test(location.origin) && !SHEET ? [location.origin] : []);
+  const urls = extraUrls.concat(known).filter((u, i, a) => a.indexOf(u) === i);
+  if (!urls.length) {
+    $('#qr').innerHTML = ''; $('#joinPick').hidden = true;
+    $('#joinUrl').textContent = S.joinNoUrl;
+    $('#joinWhere').textContent = S.joinNoUrlHelp;
+    $('#joinMore').open = true; return;
+  }
+  const sel = $('#joinSel'); sel.innerHTML = '';
+  urls.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; sel.appendChild(o); });
+  sel.value = selected || urls[0];
+  $('#joinPick').hidden = urls.length < 2;
+  drawQR(sel.value);
+}
+$('#joinForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const v = $('#joinInput').value.trim().replace(/\/+$/, '');
+  if (!/^https?:\/\/\S+$/i.test(v)) { $('#joinErr').hidden = false; return; }
+  $('#joinErr').hidden = true; extraUrls = [v].concat(extraUrls.filter(u => u !== v));
+  try { sessionStorage.setItem('ikigai-join-extra', JSON.stringify(extraUrls)); } catch (_) {}
+  fillJoinList(v); $('#joinMore').open = false;
+});
+try { extraUrls = JSON.parse(sessionStorage.getItem('ikigai-join-extra') || '[]'); } catch (e) { extraUrls = []; }
+function paintJoinCount() {
+  const n = new Set(RAW.map(r => r.c)).size;
+  $('#joinCount').textContent = n ? S.joinCount(n) : '';
+}
+$('#joinBtn').addEventListener('click', () => {
+  $('#joinTitle').textContent = S.joinTitle(INFO ? pickText(INFO.title) : '');
+  fillJoinList(); paintJoinCount();
+  $('#join').hidden = false; $('#joinClose').focus();
+});
+$('#joinSel').addEventListener('change', e => drawQR(e.target.value));
+const closeJoin = () => { $('#join').hidden = true; $('#joinBtn').focus(); };
+$('#joinClose').addEventListener('click', closeJoin);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#join').hidden) closeJoin(); });
+
+load(true);
+document.documentElement.classList.remove('boot');
+})();
+</script>
+</body>
+</html>
