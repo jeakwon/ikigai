@@ -218,7 +218,7 @@ tr:last-child td{border-bottom:0}
       </figure>
       <figure class="panel">
         <div class="panel-head">
-          <div><h2 data-t="histT">이키가이 크기 분포</h2><p class="sub" id="histSub">네 빛이 모두 함께 닿는 크기(가장 약한 빛)를 10% 구간으로 나눴어요.</p></div>
+          <div><h2 data-t="histT">이키가이 크기 분포</h2><p class="sub" id="histSub">네 빛으로 그린 마름모의 넓이(꽉 찬 마름모 대비)를 10% 구간으로 나눴어요.</p></div>
           <button class="toggle" type="button" data-table="hist" data-t="showTable">표로 보기</button>
         </div>
         <div id="hist"></div>
@@ -319,7 +319,7 @@ const STR = {
     h:{ shape:'모양', light:'빛', people:'사람', share:'비율', mean:'평균', median:'중앙값', sd:'표준편차', on:'켜진 사람', size:'이키가이 크기',
         group:'그룹', item:'문항', no:'번호', time:'시각', dur:'걸린 시간', nick:'닉네임' },
     stripsAria:'네 빛 점수 분포', meanIs:p => `평균 ${p}%`,
-    histSub:'네 빛이 모두 함께 닿는 크기(가장 약한 빛)를 10% 구간으로 나눴어요.', histSubMean:m => `네 빛이 모두 함께 닿는 크기(가장 약한 빛)를 10% 구간으로 나눴어요. 평균 ${m}%.`,
+    histSub:'네 빛으로 그린 마름모의 넓이(꽉 찬 마름모 대비)를 10% 구간으로 나눴어요.', histSubMean:m => `네 빛으로 그린 마름모의 넓이(꽉 찬 마름모 대비)를 10% 구간으로 나눴어요. 평균 ${m}%.`,
     bandAria:(l, c) => `${l}% 구간 ${c}명`, histAxis:'가로축은 이키가이 크기(%) 구간이에요.',
     corrNeed:'세 명 이상 응답하면 계산해요.', corrFoot:n => `${n}명 기준. 응답이 적으면 값이 크게 흔들려요.`,
     noGroup:'없음', rev:'역', revTitle:'역문항', minutes:m => `${m}분`,
@@ -351,7 +351,7 @@ const STR = {
     h:{ shape:'Shape', light:'Light', people:'People', share:'Share', mean:'Mean', median:'Median', sd:'SD', on:'On for', size:'Ikigai size',
         group:'Group', item:'Statement', no:'No.', time:'Time', dur:'Duration', nick:'Nickname' },
     stripsAria:'Distribution of the four light scores', meanIs:p => `Mean ${p}%`,
-    histSub:'The size all four lights reach together (the weakest light), in 10% bands.', histSubMean:m => `The size all four lights reach together (the weakest light), in 10% bands. Mean ${m}%.`,
+    histSub:'The area of the diamond the four lights draw (out of the full diamond), in 10% bands.', histSubMean:m => `The area of the diamond the four lights draw (out of the full diamond), in 10% bands. Mean ${m}%.`,
     bandAria:(l, c) => `${l}% band, ${c} ${c === 1 ? 'person' : 'people'}`, histAxis:'The horizontal axis shows ikigai size (%) bands.',
     corrNeed:'Shown once three or more people have responded.', corrFoot:n => `Based on ${n} people. With few responses, the values swing a lot.`,
     noGroup:'None', rev:'R', revTitle:'Reverse-scored', minutes:m => `${m} min`,

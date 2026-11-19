@@ -96,7 +96,78 @@ select{appearance:none;background:var(--stage);border:1.5px solid var(--line);bo
 .login form{display:flex;gap:10px;margin-top:18px}
 .login input{flex:1;min-width:0;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--text)}
 .lang-corner{position:fixed;top:14px;right:var(--pad);z-index:30}
-@media (prefers-reduced-motion:reduce){.dot.fresh .ring{animation:none}}
+.tabs{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+.tabs button{appearance:none;border:0;background:transparent;border-radius:999px;padding:6px 14px;font:600 14px/1.1 var(--sans);color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--text);color:var(--night)}
+.tabs button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.focuspill{position:absolute;left:0;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:999px;background:rgba(32,37,61,.94);font-size:14px}
+.dot.dim{opacity:.16}
+
+.stats{flex:1;min-height:0;overflow-y:auto;padding:6px var(--pad) calc(var(--pad) + 8px)}
+.stats-in{max-width:1500px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:1.25fr 1fr 1fr 1.25fr;gap:12px;margin:0 0 28px}
+.kpi{background:var(--panel);border-radius:14px;padding:14px 16px 15px;min-width:0}
+.kpi .kl{color:var(--muted);font-size:13.5px}
+.kpi .kv{font:600 30px/1.15 var(--sans);letter-spacing:-.01em;margin-top:6px;overflow-wrap:anywhere}
+.kpi.hero .kv{font-size:52px;line-height:1}
+.kpi .ks{color:var(--muted);font-size:13.5px;margin-top:4px}
+.sgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:34px var(--pad);align-items:start}
+.panel{min-width:0}
+.panel h2{font:500 19px/1.3 var(--serif);margin:0 0 4px}
+.panel .sub{color:var(--muted);font-size:13.5px;margin:0 0 12px;max-width:44em}
+.p-groups{grid-column:1/-1}
+.rbox{max-width:460px;margin:0 auto}
+.rbox svg,.gcard svg{display:block;width:100%;height:auto;overflow:visible}
+.rhit{cursor:pointer;outline:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;list-style:none;margin:8px 0 0;padding:0;color:var(--soft);font-size:13.5px;justify-content:center}
+.legend li{display:flex;align-items:center;gap:8px}
+.legend .lk{width:16px;height:2px;border-radius:2px;background:#A9A8BA}
+.legend .sw{width:14px;height:10px;border-radius:3px;background:rgba(255,244,226,.22);box-shadow:inset 0 0 0 2px #FFF4E2}
+#strips svg{display:block;width:100%;height:auto;overflow:visible;font-family:var(--sans)}
+#strips .sd{cursor:pointer;transition:opacity .15s}
+#strips svg.hov .sd{opacity:.22}
+#strips svg.hov .sd.hl{opacity:1}
+#strips .sd.sel circle,#strips .sd.hl circle{stroke:#FFF4E2}
+#strips .sd.fresh circle{animation:pop 1.6s ease-out 3}
+@keyframes pop{0%{stroke:#FFF4E2;stroke-width:6}100%{stroke-width:1.5}}
+.shapes{display:grid;gap:4px}
+.srow{appearance:none;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;width:100%;
+  display:grid;grid-template-columns:minmax(9.5em,13em) minmax(0,1fr) 2.6em;align-items:center;gap:12px;padding:5px 6px;border-radius:10px}
+.srow:hover,.srow:focus-visible{background:rgba(241,236,228,.05)}
+.srow:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.srow .nm{display:flex;align-items:center;gap:9px;min-width:0}
+.srow .nm b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow .you{font-size:12px;font-weight:600;color:var(--night);background:#FFF4E2;border-radius:99px;padding:1px 7px;flex:none}
+.srow .tr{position:relative;height:14px}
+.srow .bf{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:#8A8CA3}
+.srow.mine .bf{background:#FFF4E2}
+.srow .ct{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.chips{display:inline-flex;gap:3px;flex:none}
+.chips i{width:7px;height:7px;border-radius:50%;box-shadow:inset 0 0 0 1.3px rgba(241,236,228,.35)}
+.chips i.on{background:var(--c);box-shadow:none}
+.facts{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+.facts li{display:grid;grid-template-columns:12px minmax(0,1fr);gap:4px 12px}
+.facts .fl{width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--c,#A9A8BA);box-shadow:0 0 8px var(--c,transparent)}
+.facts .fk{color:var(--muted);font-size:13.5px}
+.facts .fv{grid-column:2;font-size:16px;line-height:1.5}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px var(--pad)}
+.gcard{margin:0}
+.gcard h3{font:600 16px/1.3 var(--sans);margin:0;overflow-wrap:anywhere}
+.gcard p{margin:2px 0 6px;color:var(--muted);font-size:13.5px}
+.numbers{margin-top:36px;border-top:1px solid var(--line);padding-top:14px}
+.numbers summary{cursor:pointer;color:var(--soft);font-weight:600;width:max-content}
+.numbers summary:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.numbers table{border-collapse:collapse;margin:16px 0 4px;font-size:14px;min-width:min(100%,520px)}
+.numbers caption{text-align:left;font:500 16px/1.3 var(--serif);padding:0 0 8px}
+.numbers th,.numbers td{padding:6px 14px 6px 0;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.numbers th{color:var(--muted);font-weight:500}
+.numbers td.num,.numbers th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tscroll{overflow-x:auto}
+.statsEmpty{color:var(--soft);text-align:center;margin:12vh auto;max-width:24em}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){.sgrid{grid-template-columns:minmax(0,1fr)}.p-groups{grid-column:auto}}
+@media (max-width:520px){.kpi .kv{font-size:24px}.kpi.hero .kv{font-size:44px}.srow{grid-template-columns:minmax(0,1fr) 2.4em;gap:4px 10px}.srow .tr{grid-column:1/-1;grid-row:2}.srow .ct{grid-row:1;grid-column:2}}
+@media (prefers-reduced-motion:reduce){.dot.fresh .ring,#strips .sd.fresh circle{animation:none}}
 </style>
 </head>
 <body>
@@ -114,6 +185,10 @@ select{appearance:none;background:var(--stage);border:1.5px solid var(--line);bo
 <header class="top" id="top" hidden>
   <h1 data-t="h1">모두의 자리</h1>
   <span class="ev" id="ev"></span>
+  <div class="tabs" role="tablist" aria-label="보기" data-ta="tabsAria">
+    <button type="button" role="tab" id="tabMap" aria-controls="stage" aria-selected="true" data-t="tabMap">지도</button>
+    <button type="button" role="tab" id="tabStats" aria-controls="stats" aria-selected="false" tabindex="-1" data-t="tabStats">통계</button>
+  </div>
   <span class="count" id="count" aria-live="polite"></span>
   <label id="groupBox" hidden><span class="sr" data-t="groupAria">그룹</span><select id="group"><option value="" data-t="allGroups">전체 그룹</option></select></label>
   <button class="btn" id="namesBtn" type="button" aria-pressed="true" data-t="names">닉네임 보이기</button>
@@ -121,8 +196,9 @@ select{appearance:none;background:var(--stage);border:1.5px solid var(--line);bo
   <button class="btn" type="button" data-lang-btn></button>
 </header>
 
-<main class="stage" id="stage" hidden>
+<main class="stage" id="stage" hidden role="tabpanel" aria-labelledby="tabMap">
   <div class="mapbox">
+    <div class="focuspill" id="focusPill" hidden><span id="focusText"></span><button class="btn" id="focusClear" type="button" data-t="focusClear">모두 보기</button></div>
     <div id="map"></div>
     <p class="empty" id="empty" hidden data-t="empty">아직 응답이 없어요. 참여자가 결과를 보내면 여기에 점으로 나타나요.</p>
   </div>
@@ -132,6 +208,46 @@ select{appearance:none;background:var(--stage);border:1.5px solid var(--line);bo
   </aside>
   <ul class="sr" id="srList"></ul>
 </main>
+
+<section class="stats" id="stats" hidden role="tabpanel" aria-labelledby="tabStats">
+  <div class="stats-in">
+    <p class="statsEmpty" id="statsEmpty" hidden data-t="statsEmpty">아직 응답이 없어요. 결과가 들어오면 여기에 통계가 생겨요.</p>
+    <div id="statsBody">
+      <section class="kpis" id="kpis" aria-live="polite"></section>
+      <div class="sgrid">
+        <section class="panel p-radar" aria-labelledby="rTitle">
+          <h2 id="rTitle" data-t="rTitle">우리 방의 네 빛</h2>
+          <p class="sub" id="rSub"></p>
+          <div class="rbox" id="roomRadar"></div>
+          <ul class="legend" id="rLegend"></ul>
+        </section>
+        <section class="panel p-strips" aria-labelledby="sTitle">
+          <h2 id="sTitle" data-t="sTitle">한 사람에 점 하나</h2>
+          <p class="sub" data-t="sSub">점 하나가 한 사람이에요. 점에 마우스를 올리면 그 사람의 다른 점들도 함께 밝아지고, 누르면 점수 카드가 열려요.</p>
+          <div id="strips"></div>
+        </section>
+        <section class="panel p-shapes" aria-labelledby="shTitle">
+          <h2 id="shTitle" data-t="shTitle">우리 방의 모양</h2>
+          <p class="sub" data-t="shSub">모양을 누르면 지도에서 그 모양인 사람만 밝게 보여요.</p>
+          <div class="shapes" id="shapes"></div>
+        </section>
+        <section class="panel p-facts" aria-labelledby="fTitle">
+          <h2 id="fTitle" data-t="fTitle">눈에 띄는 것</h2>
+          <ul class="facts" id="facts"></ul>
+        </section>
+        <section class="panel p-groups" id="groupsPanel" hidden aria-labelledby="gTitle">
+          <h2 id="gTitle" data-t="gTitle">그룹별로 보면</h2>
+          <p class="sub" data-t="gSub">회색 선은 전체 평균이에요.</p>
+          <div class="groups" id="groups"></div>
+        </section>
+      </div>
+      <details class="numbers" id="numbersBox">
+        <summary data-t="numbers">숫자로 보기</summary>
+        <div id="numbers"></div>
+      </details>
+    </div>
+  </div>
+</section>
 
 <aside class="card" id="card" hidden aria-labelledby="cardName">
   <button class="btn x" id="cardClose" type="button" aria-label="닫기" data-ta="close">×</button>
@@ -171,6 +287,26 @@ const STR = {
     collectorDown:'수집기에 연결하지 못했어요. Apps Script 배포 설정이 ‘실행: 나’, ‘액세스: 모든 사용자’인지 확인해 주세요.',
     serverDown:'서버에 연결하지 못했어요. server.py로 연 주소인지, 또는 config.js에 collectUrl이 들어 있는지 확인해 주세요.',
     sheetReadFail:'시트에서 응답을 읽지 못했어요.',
+    kPeople:'참여한 사람', kAvg:'평균 이키가이 크기', kAll:'네 빛이 모두 켜진 사람', kTop:'가장 많은 모양',
+    kPeopleV:n => `${n}명`, kYou:v => `나는 ${v}%`, kShare:p => `전체의 ${p}%`, kTopSub:(n, more) => `${n}명${more ? `, 같은 수의 모양 ${more}개 더` : ''}`,
+    rSub:() => '점선은 빛이 켜지는 60%예요.',
+    legRoom:'전체 평균', legYou:'나', room:v => `전체 ${v}%`, youV:v => `나 ${v}%`,
+    tipLight:(on, n) => `${n}명 중 ${on}명이 60% 이상`,
+    sSize:'이키가이 크기', sAvg:v => `평균 ${v}%`, axisAria:'0에서 100%까지',
+    stripsAria:'한 사람에 점 하나씩 찍은 그래프. 같은 숫자가 아래 숫자로 보기 표에 있어요.',
+    shapeTip:(name, n, p) => `${name}: ${n}명, ${p}%`, shYou:'나', focusText:name => `${name}만 밝게 보고 있어요.`,
+    fBright:'가장 밝은 빛', fFaint:'가장 어두운 빛', fLevel:'네 빛', vLevel:v => `모두 평균 ${v}% 안팎으로 비슷해요`, fAgree:'가장 많이 동의한 문장', fDisagree:'가장 덜 동의한 문장',
+    fTogether:'함께 가는 두 빛', fApart:'엇갈리는 두 빛', fGap:'그룹 차이가 가장 큰 빛', fGroupTop:'이키가이가 가장 큰 그룹', fMe:'나의 이키가이 크기',
+    vLight:(name, v) => `${name}, 평균 ${v}%`,
+    vStatement:(t, v) => `‘${t}’ 평균 ${v}점 (7점 만점)`,
+    vTogether:(a, b, r) => `${I.qj(a, '과', '와')} ${I.qt(b)}: 한쪽이 높은 사람은 다른 쪽도 높은 편이에요 (r = ${r})`,
+    vApart:(a, b, r) => `${I.qj(a, '과', '와')} ${I.qt(b)}: 한쪽이 높으면 다른 쪽은 낮은 편이에요 (r = ${r})`,
+    vGap:(name, hi, hv, lo, lv) => `${name}: ${hi} ${hv}%, ${lo} ${lv}%`,
+    vGroupTop:(g, v) => `${g}, 평균 ${v}%`,
+    vMe:p => p >= 100 ? '지금까지 가장 커요' : p > 0 ? `다른 사람의 ${p}%보다 커요` : '아직 가장 작은 편이에요',
+    gMeta:(n, a) => `${n}명, 평균 크기 ${a}%`, gAria:(g, v) => `${g} 평균: ${v}`,
+    tLights:'네 빛', tLight:'빛', tRoom:'전체 평균', tYou:'나', tOnFor:'60% 이상인 사람', tShapes:'모양', tShape:'모양', tPeople:'사람', tShare:'비율',
+    tGroups:'그룹별 평균', tGroup:'그룹', tSize:'이키가이 크기', tItems:'문장별 평균 (1–7)', tStatement:'문장', tMean:'평균', noGroup:'그룹 없음',
   },
   en: {
     title:'Where everyone stands, Ikigai Map', langAria:'한국어로 보기',
@@ -184,6 +320,26 @@ const STR = {
     collectorDown:'Couldn\'t reach the collector. Check that the Apps Script deployment is set to Execute as: Me and Who has access: Anyone.',
     serverDown:'Couldn\'t reach the server. Check that this page was opened from server.py, or that config.js has a collectUrl.',
     sheetReadFail:'Couldn\'t read responses from the sheet.',
+    kPeople:'People', kAvg:'Average ikigai size', kAll:'All four lights on', kTop:'Most common shape',
+    kPeopleV:n => String(n), kYou:v => `You: ${v}%`, kShare:p => `${p}% of the room`, kTopSub:(n, more) => `${n} ${n === 1 ? 'person' : 'people'}${more ? `, tied with ${more} more` : ''}`,
+    rSub:() => 'The dashed line is 60%, where a light turns on.',
+    legRoom:'Room average', legYou:'You', room:v => `Room ${v}%`, youV:v => `You ${v}%`,
+    tipLight:(on, n) => `${on} of ${n} at 60% or more`,
+    sSize:'Ikigai size', sAvg:v => `Average ${v}%`, axisAria:'0 to 100%',
+    stripsAria:'One dot per person. The same numbers are in the table under See the numbers.',
+    shapeTip:(name, n, p) => `${name}: ${n} ${n === 1 ? 'person' : 'people'}, ${p}%`, shYou:'You', focusText:name => `Only ${name} is lit.`,
+    fBright:'Brightest light', fFaint:'Dimmest light', fLevel:'The four lights', vLevel:v => `All close to ${v}% on average`, fAgree:'Most agreed with', fDisagree:'Least agreed with',
+    fTogether:'Two lights that go together', fApart:'Two lights that pull apart', fGap:'Biggest gap between groups', fGroupTop:'Largest ikigai by group', fMe:'Your ikigai size',
+    vLight:(name, v) => `${name}, ${v}% on average`,
+    vStatement:(t, v) => `“${t}” ${v} out of 7 on average`,
+    vTogether:(a, b, r) => `“${a}” and “${b}”: people high on one tend to be high on the other (r = ${r})`,
+    vApart:(a, b, r) => `“${a}” and “${b}”: people high on one tend to be low on the other (r = ${r})`,
+    vGap:(name, hi, hv, lo, lv) => `${name}: ${hi} ${hv}%, ${lo} ${lv}%`,
+    vGroupTop:(g, v) => `${g}, ${v}% on average`,
+    vMe:p => p >= 100 ? 'The largest so far' : p > 0 ? `Larger than ${p}% of the others` : 'The smallest so far',
+    gMeta:(n, a) => `${n} ${n === 1 ? 'person' : 'people'}, average size ${a}%`, gAria:(g, v) => `${g} average: ${v}`,
+    tLights:'The four lights', tLight:'Light', tRoom:'Room average', tYou:'You', tOnFor:'At 60% or more', tShapes:'Shapes', tShape:'Shape', tPeople:'People', tShare:'Share',
+    tGroups:'Averages by group', tGroup:'Group', tSize:'Ikigai size', tItems:'Average answer per statement (1–7)', tStatement:'Statement', tMean:'Average', noGroup:'No group',
   },
 };
 const S = STR[LG];
@@ -193,6 +349,12 @@ const STATIC_EN = {
   loginPrivate:'The organizer hasn\'t opened this map to participants. If you\'re the organizer, enter the admin key below.',
   h1:'Where everyone stands', groupAria:'Group', allGroups:'All groups', names:'Show nicknames', loading:'Loading',
   empty:'No responses yet. Each result that\'s sent shows up here as a dot.', latest:'Just joined', close:'Close',
+  tabsAria:'View', tabMap:'Map', tabStats:'Stats', focusClear:'Show everyone',
+  statsEmpty:'No responses yet. The stats appear here as results come in.',
+  rTitle:'The room\'s four lights', sTitle:'Everyone, one dot each',
+  sSub:'Each dot is one person. Hover a dot to light up that person\'s other dots, and click it to open their scores.',
+  shTitle:'Shapes in the room', shSub:'Click a shape to see only those people on the map.',
+  fTitle:'What stands out', gTitle:'By group', gSub:'The grey line is the room average.', numbers:'See the numbers',
 };
 (function applyStatic() {
   document.title = S.title;
@@ -244,7 +406,7 @@ async function fetchPublic() {
   if (!j.ok || !Array.isArray(j.people)) return { private:true };   // turned off, or a collector without the shared map yet
   let info = { title:CFG.title, groups:CFG.groups || [] };
   if (!SHEET && !INFO) { try { const c = await (await fetch('api/config', { cache:'no-store' })).json(); info = { title:c.title, groups:c.groups || [] }; } catch (e) {} }
-  return { json:{ rows:j.people, info } };
+  return { json:{ rows:j.people, info, items:j.items || null } };
 }
 let MODE = KEY ? 'admin' : 'public';
 let RAW = [], INFO = null, sig = '', failures = 0, lastOk = 0, seen = null, GROUP = '', NAMES = true, SEL = null, WAIT_KEY = false;
@@ -260,7 +422,7 @@ async function load(first) {
     if (got.denied) { WAIT_KEY = true; showLogin(); $('#loginMsg').hidden = !KEY; $('#loginErr').hidden = true; return; }
     if (got.error) { showLogin(); $('#loginMsg').hidden = true; $('#loginErr').textContent = got.error; $('#loginErr').hidden = false; return; }
     const j = got.json;
-    $('#login').hidden = true; $('#top').hidden = false; $('#stage').hidden = false;
+    $('#login').hidden = true; $('#top').hidden = false; $('#stage').hidden = VIEW !== 'map'; $('#stats').hidden = VIEW !== 'stats';
     if (!INFO) setupInfo(j.info);
     failures = 0; lastOk = Date.now();
     const me = readMe(), s = j.rows.length + ':' + (j.rows.length ? j.rows[j.rows.length - 1].id : 0) + ':' + me;
@@ -270,8 +432,9 @@ async function load(first) {
       const ids = new Set(j.rows.map(r => r.id));
       if (seen) { for (const id of ids) if (!seen.has(id)) fresh.add(id); setTimeout(() => fresh.clear(), 8000); }
       seen = ids;
-      RAW = j.rows.map(r => Object.assign({ id:r.id, t:new Date(r.t), c:r.c || 'p' + r.id, g:r.g || '', n:r.n || '' }, r.a ? I.analyze(r.a) : I.analyzeScores(r.s)));
-      render();
+      RAW = j.rows.map(r => Object.assign({ id:r.id, t:new Date(r.t), c:r.c || 'p' + r.id, g:r.g || '', n:r.n || '', a:r.a || null }, r.a ? I.analyze(r.a) : I.analyzeScores(r.s)));
+      ITEMS = j.items || null;
+      renderView();
     }
   } catch (e) {
     failures++;
@@ -279,7 +442,7 @@ async function load(first) {
   }
   paintStatus();
 }
-function showLogin() { $('#login').hidden = false; $('#top').hidden = true; $('#stage').hidden = true; }
+function showLogin() { $('#login').hidden = false; $('#top').hidden = true; $('#stage').hidden = true; $('#stats').hidden = true; }
 function setupInfo(info) {
   INFO = info || { title:'', groups:[] };
   $('#ev').textContent = pickText(INFO.title);
@@ -342,6 +505,7 @@ function closeCard() {
 function markSel() {
   const rows = people(), i = rows.findIndex(r => r.id === SEL);
   $$('#map .dot').forEach(d => d.classList.toggle('sel', +d.dataset.i === i));
+  $$('#strips .sd').forEach(d => d.classList.toggle('sel', SEL != null && +d.dataset.id === SEL));
   if (SEL != null && i < 0) { SEL = null; $('#card').hidden = true; }
 }
 $('#cardClose').addEventListener('click', closeCard);
@@ -375,6 +539,9 @@ function render() {
     if (best >= 0 && bd * Math.hypot(m.a, m.b) <= 18) openCard(rows[best], false);
     else if (!$('#card').hidden) closeCard();
   });
+  if (FOCUS != null) $$('.dot', svg).forEach(d => d.classList.toggle('dim', +d.dataset.m !== FOCUS));
+  $('#focusPill').hidden = FOCUS == null;
+  if (FOCUS != null) $('#focusText').textContent = S.focusText(TYPES[FOCUS].name);
   markSel();
   $('#count').textContent = S.count(rows.length);
   $('#empty').hidden = rows.length > 0;
@@ -383,15 +550,268 @@ function render() {
     `<li><b>${esc(r.n || S.noNick)}</b><span>${esc(TYPES[r.shape].name)}, ${S.ago(Math.max(0, (now - r.t.getTime()) / 1000))}</span></li>`).join('');
   $('#srList').innerHTML = rows.map(r => `<li>${esc(r.n || S.noNick)}: ${esc(TYPES[r.shape].name)}, ${S.sizeIs(pct(r.core))}</li>`).join('');
 }
+/* ---------------- stats: the same people, counted together ---------------- */
+let VIEW = (() => { try { return new URLSearchParams(location.search).get('view') === 'stats' ? 'stats' : 'map'; } catch (e) { return 'map'; } })();
+let FOCUS = null;   // a shape picked in the stats, shown on its own on the map
+let ITEMS = null;   // the collector's average answer per statement (everyone, with 5 people or more)
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+const chips = m => `<span class="chips" aria-hidden="true">${EL.map(e => `<i class="${m & e.bit ? 'on' : ''}" style="--c:${e.light}"></i>`).join('')}</span>`;
+const shapeRank = m => { const i = (I.SHAPE_ORDER || []).indexOf(m); return i < 0 ? 99 : i; };
+const onAt = (r, k) => r.s[k] >= I.ON - 1e-9;
+const NIGHT_HEX = I.NIGHT;
+function corr(xs, ys) {
+  const mx = mean(xs), my = mean(ys); let a = 0, b = 0, c = 0;
+  for (let i = 0; i < xs.length; i++) { const dx = xs[i] - mx, dy = ys[i] - my; a += dx * dy; b += dx * dx; c += dy * dy; }
+  return b > 0 && c > 0 ? a / Math.sqrt(b * c) : 0;
+}
+function groupOrder(rows) {
+  const seen = new Set(rows.map(r => r.g || ''));
+  const order = ((INFO && INFO.groups) || []).filter(g => seen.has(g));
+  for (const g of seen) if (!order.includes(g)) order.push(g);
+  return order;
+}
+// with raw answers (the organizer's key) this follows the group filter; the collector's averages cover everyone
+function itemMeans(rows) {
+  if (rows.length < 5) return null;
+  if (rows.every(r => r.a)) { const out = {}; I.QUESTIONS.forEach(q => { out[q.id] = mean(rows.map(r => r.a[q.id])); }); return out; }
+  return GROUP ? null : ITEMS;
+}
+
+function setView(v, focusTab) {
+  VIEW = v; const map = v === 'map';
+  $('#tabMap').setAttribute('aria-selected', String(map)); $('#tabStats').setAttribute('aria-selected', String(!map));
+  $('#tabMap').tabIndex = map ? 0 : -1; $('#tabStats').tabIndex = map ? -1 : 0;
+  if (!$('#top').hidden) { $('#stage').hidden = !map; $('#stats').hidden = map; }
+  $('#namesBtn').hidden = !map;
+  try { const q = new URLSearchParams(location.search); if (map) q.delete('view'); else q.set('view', 'stats');
+    history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '')); } catch (e) {}
+  hideTip();
+  if (focusTab) (map ? $('#tabMap') : $('#tabStats')).focus();
+  if (INFO) renderView();
+}
+function renderView() { if (VIEW === 'map') render(); else renderStats(); }
+$('#tabMap').addEventListener('click', () => setView('map'));
+$('#tabStats').addEventListener('click', () => setView('stats'));
+$('.tabs').addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); setView(VIEW === 'map' ? 'stats' : 'map', true); }
+});
+$('#focusClear').addEventListener('click', () => { FOCUS = null; render(); });
+
+const kpi = (label, value, sub, hero) => `<div class="kpi${hero ? ' hero' : ''}"><div class="kl">${esc(label)}</div><div class="kv">${esc(value)}</div>${sub ? `<div class="ks">${esc(sub)}</div>` : ''}</div>`;
+function renderStats() {
+  const rows = people(), n = rows.length, me = rows.find(r => r.id === ME) || null;
+  $('#count').textContent = S.count(n);
+  $('#statsEmpty').hidden = n > 0; $('#statsBody').hidden = n === 0;
+  if (!n) return;
+  const avg = Object.fromEntries(EL.map(e => [e.k, mean(rows.map(r => r.s[e.k]))]));
+  const cnt = {}; rows.forEach(r => { cnt[r.shape] = (cnt[r.shape] || 0) + 1; });
+  const ranked = Object.keys(cnt).map(Number).sort((a, b) => (cnt[b] - cnt[a]) || (shapeRank(a) - shapeRank(b)));
+  const top = ranked[0], tied = ranked.filter(m => cnt[m] === cnt[top]).length - 1, all = cnt[15] || 0;
+  $('#kpis').innerHTML = [
+    kpi(S.kPeople, S.kPeopleV(n), ''),
+    kpi(S.kAvg, pct(mean(rows.map(r => r.core))) + '%', me ? S.kYou(pct(me.core)) : '', true),
+    kpi(S.kAll, S.kPeopleV(all), S.kShare(Math.round(all / n * 100))),
+    kpi(S.kTop, TYPES[top].name, S.kTopSub(cnt[top], tied)),
+  ].join('');
+  renderRoomRadar(rows, avg, me);
+  renderStrips(rows, me);
+  renderShapes(cnt, ranked, me, n);
+  renderFacts(rows, avg, me);
+  renderGroups(rows, avg);
+  renderNumbers(rows, avg, me, cnt, ranked);
+  markSel();
+}
+
+// the room's average diamond, and mine on top of it
+function renderRoomRadar(rows, avg, me) {
+  const n = rows.length;
+  const lines = Object.fromEntries(EL.map(e => [e.k, [{ t:S.room(pct(avg[e.k])), strong:true }].concat(me ? [S.youV(pct(me.s[e.k]))] : [])]));
+  const layers = [{ s:avg, kind:'room' }].concat(me ? [{ s:me.s, kind:'me', alpha:0.14 }] : []);
+  $('#roomRadar').innerHTML = I.buildRadar('room', { w:420, h:me ? 372 : 352, r:112, fs:14, layers, lines, hit:true,
+    aria:S.legRoom + ': ' + EL.map(e => `${e.short} ${pct(avg[e.k])}%`).join(', ') + (me ? '. ' + S.legYou + ': ' + EL.map(e => `${e.short} ${pct(me.s[e.k])}%`).join(', ') : '') });
+  $('#rSub').textContent = S.rSub(!!me);
+  $('#rLegend').innerHTML = `<li><span class="lk"></span>${esc(S.legRoom)}</li>` + (me ? `<li><span class="sw"></span>${esc(S.legYou)}</li>` : '');
+  $$('#roomRadar .rhit').forEach(h => {
+    const e = I.ELK[h.dataset.k], on = rows.filter(r => onAt(r, e.k)).length;
+    const html = () => `<strong>${esc(e.name)}</strong><div class="row"><span class="key" style="--c:#A9A8BA"></span>${esc(S.room(pct(avg[e.k])))}</div>` +
+      (me ? `<div class="row"><span class="key" style="--c:#FFF4E2"></span>${esc(S.youV(pct(me.s[e.k])))}</div>` : '') + `<div class="k">${esc(S.tipLight(on, n))}</div>`;
+    h.addEventListener('pointermove', ev => showTip(html(), ev.clientX, ev.clientY));
+    h.addEventListener('pointerleave', hideTip);
+    h.addEventListener('focus', () => { const b = h.getBoundingClientRect(); showTip(html(), b.right, b.top); });
+    h.addEventListener('blur', hideTip);
+  });
+}
+
+// one dot per person on each measure, nudged up and down just enough not to overlap
+function swarm(vals, x0, w, r) {
+  const pts = vals.map((v, i) => ({ i, x:x0 + I.clamp(v, 0, 1) * w, y:0 })).sort((a, b) => a.x - b.x);
+  const placed = [], d = 2 * r + 1.5, step = r + 0.8;
+  for (const p of pts) {
+    const near = placed.filter(q => Math.abs(q.x - p.x) < d);
+    for (let k = 0; k < 80; k++) {
+      const y = k === 0 ? 0 : (k % 2 ? 1 : -1) * Math.ceil(k / 2) * step;
+      if (near.every(q => Math.hypot(q.x - p.x, q.y - y) >= d)) { p.y = y; break; }
+    }
+    placed.push(p);
+  }
+  return pts.sort((a, b) => a.i - b.i);
+}
+function renderStrips(rows, me) {
+  const box = $('#strips'), W = Math.max(280, Math.round(box.clientWidth || 640)), narrow = W < 540;
+  const r = rows.length > 150 ? 3 : rows.length > 70 ? 3.6 : 4.6;
+  const labW = narrow ? 0 : Math.min(196, Math.round(W * 0.3)), x0 = labW + (narrow ? 6 : 14), w = W - x0 - 14;
+  const defs = [{ k:'size', name:S.sSize, light:null, get:p => p.core }].concat(EL.map(e => ({ k:e.k, name:e.name, light:e.light, get:p => p.s[e.k] })));
+  const grid = [], marks = [], dots = [], meDots = [], hits = [];
+  let y = 4;
+  defs.forEach((d, ri) => {
+    const vals = rows.map(d.get), pts = swarm(vals, x0, w, r), avgV = mean(vals);
+    const half = Math.max(15, Math.max(...pts.map(p => Math.abs(p.y))) + r + 3), labH = narrow ? 24 : 0, cy = y + labH + half;
+    const lamp = d.light ? `<circle cx="${narrow ? 4 : 4}" cy="${narrow ? y + 11 : cy - 8}" r="4" fill="${d.light}"/>` : '';
+    if (narrow) marks.push(`${lamp}<text x="${d.light ? 14 : 0}" y="${y + 15}" font-size="14" font-weight="500" fill="#F1ECE4">${esc(d.name)}<tspan dx="9" font-size="12.5" fill="#A9A8BA">${esc(S.sAvg(pct(avgV)))}</tspan></text>`);
+    else marks.push(`${lamp}<text x="${d.light ? 14 : 0}" y="${cy - 4}" font-size="14" font-weight="500" fill="#F1ECE4">${esc(d.name)}</text>
+      <text x="${d.light ? 14 : 0}" y="${cy + 14}" font-size="12.5" fill="#A9A8BA">${esc(S.sAvg(pct(avgV)))}</text>`);
+    grid.push(`<line x1="${x0}" x2="${x0 + w}" y1="${cy}" y2="${cy}" stroke="#F1ECE4" stroke-opacity=".07"/>`);
+    if (d.light) {
+      const tx = (x0 + I.ON * w).toFixed(1);
+      marks.push(`<line x1="${tx}" x2="${tx}" y1="${cy - half + 2}" y2="${cy + half - 2}" stroke="#F1ECE4" stroke-opacity=".5" stroke-width="1.2" stroke-dasharray="3 3"/>`);
+      if (ri === 1) marks.push(`<text x="${tx}" y="${cy - half - 3}" text-anchor="middle" font-size="11.5" fill="#A9A8BA">${pct(I.ON)}%</text>`);
+    }
+    pts.forEach((p, i) => {
+      const person = rows[i], mine = person.id === ME, py = cy + p.y;
+      const g = `<g class="sd${mine ? ' me' : ''}${fresh.has(person.id) ? ' fresh' : ''}" data-id="${person.id}"><circle cx="${p.x.toFixed(1)}" cy="${py.toFixed(1)}" r="${mine ? r + 2 : r}" fill="${mine ? '#FFF4E2' : d.light || '#D7D4DF'}" stroke="${NIGHT_HEX}" stroke-width="${mine ? 2 : 1.5}"/></g>`;
+      (mine ? meDots : dots).push(g);
+      hits.push({ x:p.x, y:py, d, person });
+    });
+    y = cy + half + 12;
+  });
+  const axisY = y + 4;
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    const x = (x0 + t * w).toFixed(1);
+    grid.push(`<line x1="${x}" x2="${x}" y1="4" y2="${axisY - 8}" stroke="#F1ECE4" stroke-opacity=".06"/>`);
+    marks.push(`<text x="${x}" y="${axisY + 8}" text-anchor="${t === 0 ? 'start' : t === 1 ? 'end' : 'middle'}" font-size="12" fill="#A9A8BA">${pct(t)}%</text>`);
+  }
+  const H = axisY + 14;
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(S.stripsAria)}">${grid.join('')}${marks.join('')}${dots.join('')}${meDots.join('')}</svg>`;
+  const svg = $('svg', box);
+  const nearest = ev => {
+    const m = svg.getScreenCTM(); if (!m) return null;
+    const q = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(m.inverse());
+    let best = null, bd = Infinity;
+    for (const h of hits) { const dd = Math.hypot(h.x - q.x, h.y - q.y); if (dd < bd) { bd = dd; best = h; } }
+    return best && bd * Math.hypot(m.a, m.b) <= 16 ? best : null;
+  };
+  const light = id => { svg.classList.toggle('hov', id != null); $$('.sd', svg).forEach(g => g.classList.toggle('hl', id != null && +g.dataset.id === id)); };
+  const tipFor = h => `<strong>${esc(h.person.n || S.noNick)}${h.person.id === ME ? ` (${esc(S.you)})` : ''}</strong>` + defs.map(d =>
+    `<div class="row"${d === h.d ? ' style="font-weight:600"' : ''}><span class="key" style="--c:${d.light || '#D7D4DF'}"></span>${esc(d.name)} ${pct(d.get(h.person))}%</div>`).join('');
+  svg.addEventListener('pointermove', ev => { const h = nearest(ev); if (h) { light(h.person.id); showTip(tipFor(h), ev.clientX, ev.clientY); } else { light(null); hideTip(); } });
+  svg.addEventListener('pointerleave', () => { light(null); hideTip(); });
+  svg.addEventListener('click', ev => { const h = nearest(ev); if (h) openCard(h.person, false); else if (!$('#card').hidden) closeCard(); });
+}
+
+// shapes, most common first, in one colour; mine stands out
+function renderShapes(cnt, ranked, me, n) {
+  const max = cnt[ranked[0]];
+  $('#shapes').innerHTML = ranked.map(m => {
+    const mine = !!me && me.shape === m, c = cnt[m];
+    return `<button type="button" class="srow${mine ? ' mine' : ''}" data-m="${m}" aria-label="${esc(S.shapeTip(TYPES[m].name, c, Math.round(c / n * 100)))}">
+      <span class="nm">${chips(m)}<b>${esc(TYPES[m].name)}</b>${mine ? `<span class="you">${esc(S.shYou)}</span>` : ''}</span>
+      <span class="tr"><span class="bf" style="width:${Math.max(1.5, c / max * 100).toFixed(1)}%"></span></span><span class="ct">${c}</span></button>`;
+  }).join('');
+  $$('#shapes .srow').forEach(b => {
+    const m = +b.dataset.m, html = () => `<strong>${cnt[m]}</strong><div class="k">${esc(S.shapeTip(TYPES[m].name, cnt[m], Math.round(cnt[m] / n * 100)))}</div>`;
+    b.addEventListener('pointermove', ev => { if (ev.pointerType === 'mouse') showTip(html(), ev.clientX, ev.clientY); });
+    b.addEventListener('pointerleave', hideTip);
+    b.addEventListener('click', () => { FOCUS = m; setView('map'); });
+  });
+}
+
+// a few plain sentences about the room
+function renderFacts(rows, avg, me) {
+  const out = [], n = rows.length;
+  const byAvg = EL.slice().sort((a, b) => avg[b.k] - avg[a.k]);
+  if (avg[byAvg[0].k] - avg[byAvg[3].k] >= 0.02) {
+    out.push({ c:byAvg[0].light, k:S.fBright, v:S.vLight(byAvg[0].name, pct(avg[byAvg[0].k])) });
+    out.push({ c:byAvg[3].light, k:S.fFaint, v:S.vLight(byAvg[3].name, pct(avg[byAvg[3].k])) });
+  } else out.push({ c:null, k:S.fLevel, v:S.vLevel(pct(mean(EL.map(e => avg[e.k])))) });
+  if (me && n > 1) {
+    const others = rows.filter(r => r.id !== me.id), below = others.filter(r => r.core < me.core - 1e-9).length;
+    out.push({ c:'#FFF4E2', k:S.fMe, v:S.vMe(Math.round(below / others.length * 100)) });
+  }
+  const items = itemMeans(rows);
+  if (items) {
+    const qs = I.QUESTIONS.filter(q => items[q.id] != null).sort((a, b) => items[b.id] - items[a.id]);
+    const hi = qs[0], lo = qs[qs.length - 1];
+    out.push({ c:I.ELK[hi.d].light, k:S.fAgree, v:S.vStatement(hi.t, items[hi.id].toFixed(1)) });
+    out.push({ c:I.ELK[lo.d].light, k:S.fDisagree, v:S.vStatement(lo.t, items[lo.id].toFixed(1)) });
+  }
+  if (n >= 8) {
+    const pairs = [];
+    for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) { const a = EL[i], b = EL[j]; pairs.push({ a, b, r:corr(rows.map(x => x.s[a.k]), rows.map(x => x.s[b.k])) }); }
+    pairs.sort((x, y) => y.r - x.r);
+    const up = pairs[0], down = pairs[pairs.length - 1];
+    if (up.r >= 0.3) out.push({ c:null, k:S.fTogether, v:S.vTogether(up.a.name, up.b.name, up.r.toFixed(2)) });
+    if (down.r <= -0.3) out.push({ c:null, k:S.fApart, v:S.vApart(down.a.name, down.b.name, down.r.toFixed(2)) });
+  }
+  if (!GROUP) {
+    const gs = groupOrder(rows).filter(g => g).map(g => ({ g, rs:rows.filter(r => r.g === g) })).filter(x => x.rs.length >= 3);
+    if (gs.length >= 2) {
+      let best = null;
+      for (const e of EL) {
+        const ms = gs.map(x => ({ g:x.g, v:mean(x.rs.map(r => r.s[e.k])) })).sort((a, b) => b.v - a.v), gap = ms[0].v - ms[ms.length - 1].v;
+        if (!best || gap > best.gap) best = { e, gap, hi:ms[0], lo:ms[ms.length - 1] };
+      }
+      if (best.gap >= 0.1) out.push({ c:best.e.light, k:S.fGap, v:S.vGap(best.e.name, best.hi.g, pct(best.hi.v), best.lo.g, pct(best.lo.v)) });
+      const tg = gs.map(x => ({ g:x.g, v:mean(x.rs.map(r => r.core)) })).sort((a, b) => b.v - a.v)[0];
+      out.push({ c:null, k:S.fGroupTop, v:S.vGroupTop(tg.g, pct(tg.v)) });
+    }
+  }
+  $('#facts').innerHTML = out.map(f => `<li><span class="fl"${f.c ? ` style="--c:${f.c}"` : ''}></span><span class="fk">${esc(f.k)}</span><span class="fv">${esc(f.v)}</span></li>`).join('');
+}
+
+// one small radar per group, each over the room's average
+function renderGroups(rows, avg) {
+  const gs = GROUP ? [] : groupOrder(rows).map(g => ({ g, rs:rows.filter(r => (r.g || '') === g) })).filter(x => x.rs.length);
+  const show = gs.length >= 2 && gs.some(x => x.g);
+  $('#groupsPanel').hidden = !show;
+  if (!show) { $('#groups').innerHTML = ''; return; }
+  $('#groups').innerHTML = gs.map(x => {
+    const a = Object.fromEntries(EL.map(e => [e.k, mean(x.rs.map(r => r.s[e.k]))])), name = x.g || S.noGroup;
+    return `<figure class="gcard"><h3>${esc(name)}</h3><p>${esc(S.gMeta(x.rs.length, pct(mean(x.rs.map(r => r.core)))))}</p>` +
+      I.buildRadar('g', { w:240, h:206, r:70, fs:12, gap:9, layers:[{ s:avg, kind:'room' }, { s:a, kind:'me', alpha:0.14, dot:4 }],
+        aria:S.gAria(name, EL.map(e => `${e.short} ${pct(a[e.k])}%`).join(', ')) }) + `</figure>`;
+  }).join('');
+}
+
+// the same numbers as tables
+function renderNumbers(rows, avg, me, cnt, ranked) {
+  const n = rows.length, th = t => `<th class="num">${esc(t)}</th>`, td = t => `<td class="num">${t}</td>`;
+  let h = `<div class="tscroll"><table><caption>${esc(S.tLights)}</caption><thead><tr><th>${esc(S.tLight)}</th>${th(S.tRoom)}${me ? th(S.tYou) : ''}${th(S.tOnFor)}</tr></thead><tbody>` +
+    EL.map(e => `<tr><td>${esc(e.name)}</td>${td(pct(avg[e.k]) + '%')}${me ? td(pct(me.s[e.k]) + '%') : ''}${td(rows.filter(r => onAt(r, e.k)).length + '/' + n)}</tr>`).join('') +
+    `<tr><td>${esc(S.tSize)}</td>${td(pct(mean(rows.map(r => r.core))) + '%')}${me ? td(pct(me.core) + '%') : ''}<td></td></tr></tbody></table></div>`;
+  h += `<div class="tscroll"><table><caption>${esc(S.tShapes)}</caption><thead><tr><th>${esc(S.tShape)}</th>${th(S.tPeople)}${th(S.tShare)}</tr></thead><tbody>` +
+    ranked.map(m => `<tr><td>${esc(TYPES[m].name)}</td>${td(cnt[m])}${td(Math.round(cnt[m] / n * 100) + '%')}</tr>`).join('') + `</tbody></table></div>`;
+  if (!$('#groupsPanel').hidden) {
+    const gs = groupOrder(rows);
+    h += `<div class="tscroll"><table><caption>${esc(S.tGroups)}</caption><thead><tr><th>${esc(S.tGroup)}</th>${th(S.tPeople)}${EL.map(e => th(e.short)).join('')}${th(S.tSize)}</tr></thead><tbody>` +
+      gs.map(g => { const rs = rows.filter(r => (r.g || '') === g);
+        return `<tr><td>${esc(g || S.noGroup)}</td>${td(rs.length)}${EL.map(e => td(pct(mean(rs.map(r => r.s[e.k]))) + '%')).join('')}${td(pct(mean(rs.map(r => r.core))) + '%')}</tr>`; }).join('') + `</tbody></table></div>`;
+  }
+  const items = itemMeans(rows);
+  if (items) h += `<div class="tscroll"><table><caption>${esc(S.tItems)}</caption><thead><tr><th>${esc(S.tStatement)}</th>${th(S.tMean)}</tr></thead><tbody>` +
+    I.QUESTIONS.filter(q => items[q.id] != null).sort((a, b) => items[b.id] - items[a.id]).map(q => `<tr><td>${esc(q.t)}</td>${td(items[q.id].toFixed(1))}</tr>`).join('') + `</tbody></table></div>`;
+  $('#numbers').innerHTML = h;
+}
+
 $('#namesBtn').setAttribute('aria-pressed', String(NAMES));
 $('#namesBtn').addEventListener('click', () => {
   NAMES = !NAMES; $('#namesBtn').setAttribute('aria-pressed', String(NAMES));
   try { localStorage.setItem('ikigai-map:names', NAMES ? 'on' : 'off'); } catch (e) {}
   render();
 });
-$('#group').addEventListener('change', e => { GROUP = e.target.value; render(); });
-let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (RAW.length) render(); }, 200); });
+$('#group').addEventListener('change', e => { GROUP = e.target.value; renderView(); });
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (INFO) renderView(); }, 200); });
 
+setView(VIEW);
 load(true);
 document.documentElement.classList.remove('boot');
 })();

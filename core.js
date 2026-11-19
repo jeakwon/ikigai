@@ -86,10 +86,10 @@ const ORDER = [
 ];
 const SCALE = ['전혀 아니다','아니다','약간 아니다','보통이다','약간 그렇다','그렇다','매우 그렇다'];
 
-// The 15 shapes of a tetrahedron (4 vertices, 6 edges, 4 faces, 1 centre) plus 0 = no light yet.
+// The 15 shapes (one light, two, three, all four) plus 0 = no light at 60% yet.
 const TYPES = {
   0:  { name:'탐색자', tag:'아직 어느 빛도 켜지지 않았어요',
-        desc:'네 빛이 모두 아주 약한 상태예요. 지금 하는 일이 나와 맞지 않거나, 새 길을 찾는 시기일 수 있어요. 그중 가장 덜 어두운 빛 하나를 골라 작게 실험해 보세요.' },
+        desc:'아직 60%를 넘은 빛이 없어요. 네 가지 모두 확신이 서지 않는 상태라, 지금 하는 일이 나와 맞는지 살펴보거나 새 길을 찾는 시기일 수 있어요. 그중 가장 밝은 빛 하나를 골라 작게 실험해 보세요.' },
   1:  { name:'몽상가', tag:'좋아하는 마음이 먼저 달려가요',
         desc:'무엇을 좋아하는지는 분명하지만, 아직 실력과 쓸모, 수입으로 이어지지 않았어요. 취미와 가능성 사이에 있는 상태예요. 좋아하는 일을 잘하는 일로 키우는 것이 다음 단계예요.' },
   2:  { name:'숨은 실력자', tag:'잘하지만 아직 빛을 못 봤어요',
@@ -118,9 +118,9 @@ const TYPES = {
         desc:'좋아하고, 의미 있고, 보상도 있는 일이에요. 그런데 실력에 대한 확신이 부족해요. 기회가 실력보다 앞서 있어 불안할 수 있어요. 의도적인 연습과 피드백으로 전문성을 쌓으면 이키가이에 닿아요.' },
   14: { name:'베테랑', tag:'편안하지만, 공허해요',
         desc:'잘하고, 필요하고, 돈도 되는, 겉으로 보기엔 훌륭한 일이에요. 그런데 마음이 따라오지 않아요. 일의 어떤 순간에 즐거움을 느끼는지 찾거나, 좋아하는 요소를 일에 끌어들이는 것이 필요해요.' },
-  15: { name:'이키가이', tag:'네 개의 빛이 고르게 닿아 있어요',
+  15: { name:'이키가이', tag:'네 개의 빛이 모두 켜져 있어요',
         desc:'좋아하고, 잘하고, 세상에 필요하고, 보상도 따르는 일이에요. 아침에 일어날 이유가 분명한 상태죠. 균형은 계속 변하니, 가장 약한 빛이 꺼지지 않도록 돌봐 주세요.',
-        descDim:'네 빛이 고르게 닿아 있지만 아직 약한 상태예요. 균형은 이미 잡혀 있으니, 넷을 함께 조금씩 키우면 이키가이도 그 모양 그대로 커져요. 가장 약한 빛부터 챙겨 보세요.' },
+        descDim:'네 빛이 모두 켜졌지만 아직 60%를 조금 넘은 정도예요. 균형은 이미 잡혀 있으니, 넷을 함께 조금씩 키우면 이키가이도 그 모양 그대로 커져요. 가장 약한 빛부터 챙겨 보세요.' },
 };
 const SHAPE_ORDER = [1, 2, 4, 8, 3, 5, 10, 12, 6, 9, 7, 11, 13, 14, 15];   // by number of lights
 const TIPS = {
@@ -175,7 +175,7 @@ const EN = {
   scale: ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neutral', 'Somewhat agree', 'Agree', 'Strongly agree'],
   types: {
     0:  { name:'Explorer', tag:'None of the lights is on yet',
-          desc:'All four lights are very dim. Your current work may not suit you, or you may be in a season of looking for a new path. Pick the least dim of the four and try a small experiment with it.' },
+          desc:'No light has reached 60% yet. You\'re not sure about any of the four, which can mean it\'s time to check whether this work suits you, or a season of looking for a new path. Pick the brightest of the four and try a small experiment with it.' },
     1:  { name:'Dreamer', tag:'Your heart runs ahead',
           desc:'You know clearly what you love, but it hasn\'t turned into skill, usefulness or income yet. You\'re somewhere between a hobby and a possibility. The next step is growing what you love into something you\'re good at.' },
     2:  { name:'Hidden talent', tag:'Skilled, but not yet seen',
@@ -204,9 +204,9 @@ const EN = {
           desc:'You love it, it matters, and it pays. But you lack confidence in your skills. Opportunity is running ahead of ability, which can feel unsettling. Build expertise through deliberate practice and feedback, and you\'ll reach ikigai.' },
     14: { name:'Veteran', tag:'Comfortable, but empty',
           desc:'You\'re good at it, it\'s needed, and it pays: work that looks great from the outside. But your heart isn\'t in it. Notice which moments of the work you enjoy, or bring things you love into it.' },
-    15: { name:'Ikigai', tag:'All four lights reach you evenly',
+    15: { name:'Ikigai', tag:'All four lights are on',
           desc:'You love it, you\'re good at it, the world needs it, and it pays. You have a clear reason to get up in the morning. Balance keeps shifting, so look after your weakest light so it doesn\'t go out.',
-          descDim:'All four lights reach you evenly, but they\'re still faint. The balance is already there, so grow all four a little at a time and your ikigai grows in the same shape. Start with your weakest light.' },
+          descDim:'All four lights are on, but only just past 60%. The balance is already there, so grow all four a little at a time and your ikigai grows in the same shape. Start with your weakest light.' },
   },
   tips: {
     L:['Write down the three moments from the past month when you were most absorbed, and look for what they share.', 'See whether you can gradually grow the share of your current work that you enjoy.'],
@@ -230,9 +230,9 @@ const WORDS = LANG === 'en'
 /* =========================================================
    Scoring  (mirrored in server.py)
    ========================================================= */
-const RHO = 0.75;        // a light counts as "on" when it reaches 75% of your brightest light
-const NO_LIGHT = 0.15;   // below this everywhere, no shape has formed yet
+const ON = 0.6;          // a light is on at 60% or more: on average, leaning toward agree (4 is neutral, 5 is 'somewhat agree')
 const EPS = 1e-9;
+const RHO = ON, NO_LIGHT = ON;   // older names, kept so pages built against them still load
 
 function computeScores(ans) {
   const sum = { L:0, G:0, N:0, P:0 }, n = { L:0, G:0, N:0, P:0 };
@@ -245,20 +245,23 @@ function computeScores(ans) {
   return s;
 }
 const maxOf = s => Math.max(s.L, s.G, s.N, s.P);
-const coreOf = s => Math.min(s.L, s.G, s.N, s.P);           // ikigai size: the part all four lights reach
+// ikigai size: the area of the radar the four lights draw (love up, good at left, needed right, paid down),
+// as a share of the full diamond. Neighbours multiply, so it is a quarter of passion + mission + profession + vocation.
+const coreOf = s => (s.L + s.P) * (s.G + s.N) / 4;
+// with no light at 60% there is no shape yet (explorer); with all four there, the shape is ikigai
 function shapeOf(s) {
-  const mx = maxOf(s);
-  if (mx < NO_LIGHT) return 0;
-  let m = 0; for (const e of EL) if (s[e.k] >= RHO * mx - EPS) m |= e.bit;
+  let m = 0; for (const e of EL) if (s[e.k] >= ON - EPS) m |= e.bit;
   return m;
 }
+// how much the size would grow if light k rose by d (capped at 100%)
+function sizeIf(s, k, d) { const t = Object.assign({}, s); t[k] = Math.min(1, t[k] + d); return coreOf(t); }
 const members = m => EL.filter(e => m & e.bit);
 const level = m => members(m).length;
 function glowOf(s, m) {                                       // brightness of the lights that form the shape
   const on = members(m); if (!on.length) return maxOf(s);
   return on.reduce((a, e) => a + s[e.k], 0) / on.length;
 }
-const glowWord = v => WORDS.glow[v >= 0.75 ? 0 : v >= 0.55 ? 1 : v >= 0.35 ? 2 : 3];
+const glowWord = v => WORDS.glow[v >= 0.9 ? 0 : v >= 0.8 ? 1 : v >= 0.7 ? 2 : 3];   // lit lights are always 60% or more
 // Where the shape points, without its size: each light relative to the brightest, sharpened so that
 // one-light shapes sit by their vertex, two-light shapes by their edge, three by their face, four in the middle.
 const SHARP = 4;
@@ -349,10 +352,11 @@ const LBL = {
 };
 
 /* where a person goes */
-// how clearly each light counts as on, relative to the brightest light (exactly 0.5 on the 75% line)
+// how clearly each light counts as on: exactly 0.5 on the 60% line, fading in over 12 points either side
+const ON_SOFT = 0.12;
 function onness(s) {
-  const mx = maxOf(s) || 1, o = {};
-  for (const k of KEYS) o[k] = clamp((s[k] / mx - 0.5) * 2, 0.02, 0.98);
+  const o = {};
+  for (const k of KEYS) o[k] = clamp(0.5 + (s[k] - ON) / (2 * ON_SOFT), 0.02, 0.98);
   return o;
 }
 function fit(mask, o) { let p = 1; for (const e of EL) p *= (mask & e.bit) ? o[e.k] : 1 - o[e.k]; return p; }
@@ -656,11 +660,72 @@ function lightUp(svg) {
   requestAnimationFrame(frame);
 }
 
+/* =========================================================
+   The radar
+   The four lights on four spokes, placed as on the map: love up, good at left, needed right, paid down.
+   The share of the full diamond that a person's diamond covers is their ikigai size.
+   ========================================================= */
+const RADAR_DIR = { L:[0, -1], N:[1, 0], P:[0, 1], G:[-1, 0] };
+const RADAR_ORDER = ['L', 'N', 'P', 'G'];
+const RADAR_INK = { text:'#F1ECE4', muted:'#A9A8BA', me:'#FFF4E2', room:'#A9A8BA' };
+function radarPath(s, cx, cy, R) {
+  return RADAR_ORDER.map((k, i) => { const [dx, dy] = RADAR_DIR[k], v = clamp(s[k], 0, 1);
+    return (i ? 'L' : 'M') + r1(cx + dx * v * R) + ' ' + r1(cy + dy * v * R); }).join(' ') + ' Z';
+}
+// opt: { w, h, r, fs, gap, layers:[{ s, kind:'me'|'room', grow, fill, alpha, dot }],
+//        lines:{ L:[...] } (text under each light's name: a string, or { t, strong }), names:'none' to drop them,
+//        on:false to drop the 60% line, aria, hit:true for a wide invisible band on each spoke (hover and focus) }
+function buildRadar(uid, opt = {}) {
+  const W = opt.w || 340, H = opt.h || 300, R = opt.r || 96, cx = W / 2, cy = H / 2, fs = opt.fs || 13;
+  const p = [`<svg class="radar-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escX(opt.aria || '')}">`];
+  const ring = f => ({ L:f, G:f, N:f, P:f });
+  for (const f of [0.25, 0.5, 0.75, 1]) p.push(`<path d="${radarPath(ring(f), cx, cy, R)}" fill="none" stroke="${RADAR_INK.text}" stroke-opacity="${f === 1 ? 0.24 : 0.09}" stroke-width="1"/>`);
+  for (const k of RADAR_ORDER) { const [dx, dy] = RADAR_DIR[k]; p.push(`<line x1="${cx}" y1="${cy}" x2="${r1(cx + dx * R)}" y2="${r1(cy + dy * R)}" stroke="${RADAR_INK.text}" stroke-opacity="0.09" stroke-width="1"/>`); }
+  if (opt.on !== false) p.push(`<path d="${radarPath(ring(ON), cx, cy, R)}" fill="none" stroke="${RADAR_INK.text}" stroke-opacity="0.5" stroke-width="1.2" stroke-dasharray="4 4"/>`);
+  (opt.layers || []).forEach(ly => {
+    const d = radarPath(ly.s, cx, cy, R), grow = ly.grow ? ` style="transform-origin:${cx}px ${cy}px"` : '';
+    if (ly.kind === 'room') {
+      p.push(`<g class="ly room${ly.grow ? ' grow' : ''}"${grow}><path d="${d}" fill="none" stroke="${RADAR_INK.room}" stroke-width="2" stroke-linejoin="round"/>`);
+      for (const k of RADAR_ORDER) { const [dx, dy] = RADAR_DIR[k], v = clamp(ly.s[k], 0, 1);
+        p.push(`<circle cx="${r1(cx + dx * v * R)}" cy="${r1(cy + dy * v * R)}" r="3.5" fill="${RADAR_INK.room}" stroke="${NIGHT}" stroke-width="2"/>`); }
+    } else {
+      p.push(`<g class="ly me${ly.grow ? ' grow' : ''}"${grow}><path d="${d}" fill="${ly.fill || RADAR_INK.me}" fill-opacity="${ly.alpha || 0.16}" stroke="${RADAR_INK.me}" stroke-width="2" stroke-linejoin="round"/>`);
+      for (const k of RADAR_ORDER) { const [dx, dy] = RADAR_DIR[k], v = clamp(ly.s[k], 0, 1);
+        p.push(`<circle cx="${r1(cx + dx * v * R)}" cy="${r1(cy + dy * v * R)}" r="${ly.dot || 5}" fill="${ELK[k].light}" stroke="${NIGHT}" stroke-width="2"/>`); }
+    }
+    p.push('</g>');
+  });
+  // the 60% line's label goes on top, with a halo, so a diamond crossing it never hides it
+  if (opt.on !== false) p.push(`<text x="${r1(cx + ON * R / 2 + 5)}" y="${r1(cy - ON * R / 2 - 5)}" font-family="${SANS}" font-size="${fs - 2}" font-weight="500" fill="${RADAR_INK.muted}" stroke="${NIGHT}" stroke-width="3.5" stroke-linejoin="round" paint-order="stroke">${pct(ON)}%</text>`);
+  if (opt.names !== 'none') {
+    const gap = opt.gap || 12, lh = fs + 5;
+    for (const k of RADAR_ORDER) {
+      const e = ELK[k], [dx, dy] = RADAR_DIR[k], lines = (opt.lines && opt.lines[k]) || [], name = e.short;
+      const ax = cx + dx * (R + gap), anchor = dx < 0 ? 'end' : dx > 0 ? 'start' : 'middle';
+      const n = 1 + lines.length;
+      const y0 = dy < 0 ? cy - R - gap - (n - 1) * lh : dy > 0 ? cy + R + gap + fs * 0.8 : cy - (n - 1) * lh / 2 + fs * 0.35;
+      const w = textW(name, fs, 500), lampW = 12;
+      // the lamp sits before the name, so the name's run starts where the anchor puts it
+      const x0 = anchor === 'start' ? ax : anchor === 'end' ? ax - w - lampW : ax - (w + lampW) / 2;
+      p.push(`<circle cx="${r1(x0 + 4)}" cy="${r1(y0 - fs * 0.34)}" r="4" fill="${e.light}"/>`);
+      p.push(`<text x="${r1(x0 + lampW)}" y="${r1(y0)}" font-family="${SANS}" font-size="${fs}" font-weight="500" fill="${RADAR_INK.muted}">${escX(name)}</text>`);
+      lines.forEach((ln, i) => {
+        const o = typeof ln === 'string' ? { t:ln } : ln, y = y0 + (i + 1) * lh, size = o.strong ? fs + 2 : fs - 1;
+        p.push(`<text x="${r1(ax)}" y="${r1(y)}" text-anchor="${anchor}" font-family="${SANS}" font-size="${size}" font-weight="${o.strong ? 600 : 500}" fill="${o.strong ? RADAR_INK.text : RADAR_INK.muted}">${escX(o.t)}</text>`);
+      });
+    }
+  }
+  if (opt.hit) for (const k of RADAR_ORDER) { const [dx, dy] = RADAR_DIR[k];
+    p.push(`<line class="rhit" data-k="${k}" tabindex="0" role="button" aria-label="${escX(ELK[k].name)}" x1="${cx}" y1="${cy}" x2="${r1(cx + dx * (R + 10))}" y2="${r1(cy + dy * (R + 10))}" stroke="transparent" stroke-width="30" stroke-linecap="round"/>`); }
+  p.push('</svg>');
+  return p.join('');
+}
+
 root.Ikigai = {
   LANG, LANGS, OTHER_LANG, setLang, WORDS,
   NIGHT, TEXT, EL, ELK, KEYS, BIT, QUESTIONS, ORDER, SCALE, TYPES, SHAPE_ORDER, TIPS, RHO, NO_LIGHT, OFF_MAP,
-  computeScores, shapeOf, coreOf, glowOf, glowWord, balance, analyze, analyzeScores, members, level, shapeLabel,
+  ON, computeScores, shapeOf, coreOf, sizeIf, glowOf, glowWord, balance, analyze, analyzeScores, members, level, shapeLabel,
   mixLights, maskWeights, rgbCss, rgbHex, hexRgb, clamp, qt, qj, hasJong, pct, reduceMotion,
-  REG, REG_ORDER, placeOf, locate, crowdLayout, crowdLabels, buildMap, wireMap, lightUp, setLights, regionRGB, inkFor, FULL,
+  REG, REG_ORDER, placeOf, locate, crowdLayout, crowdLabels, buildMap, wireMap, lightUp, setLights, regionRGB, inkFor, FULL, buildRadar,
 };
 })(window);

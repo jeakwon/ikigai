@@ -157,7 +157,13 @@ html[lang="en"] .intro h1{font-size:clamp(32px,3.6vw,52px)}
 .rsec{margin-top:50px}
 .rsec h3{font:500 20px/1.3 var(--serif);margin:0 0 6px}
 .cap{color:var(--muted);font-size:14.5px;margin:0 0 18px}
-.size-row{display:flex;align-items:baseline;gap:18px;margin:12px 0 10px}
+.size-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:4px 26px;margin-top:6px}
+.radar{flex:0 0 auto;width:min(100%,300px);margin:0}
+.radar svg{display:block;width:100%;height:auto;overflow:visible}
+.radar .grow{transform:scale(1);transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.radar.pre .grow{transform:scale(.04)}
+.size-text{flex:1 1 210px;min-width:0}
+.size-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 18px;margin:12px 0 10px}
 .size-fig{font:600 56px/1 var(--sans);letter-spacing:-.02em}
 .size-sub{color:var(--muted);font-size:15px}
 .note{color:var(--soft);margin:0}
@@ -176,7 +182,7 @@ html[lang="en"] .intro h1{font-size:clamp(32px,3.6vw,52px)}
 @media (max-width:560px){.bar{grid-template-columns:1fr auto;gap:8px 12px}.track{grid-column:1/-1;grid-row:2}}
 .compare{display:grid;gap:8px}
 .compare:empty{display:none}
-.maplink{margin-top:14px!important}
+.maplink{margin-top:14px!important;display:flex;flex-wrap:wrap;gap:8px}
 .sendform{display:grid;gap:8px;margin:12px 0 14px}
 .nick-label{font-weight:600;font-size:15px}
 .nick-label small{font-weight:400;font-size:14px;color:var(--muted);margin-left:4px}
@@ -207,7 +213,7 @@ html[lang="en"] .intro h1{font-size:clamp(32px,3.6vw,52px)}
 .sheet .row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}
 .sheet .hint{color:var(--muted);font-size:13.5px;margin:0;flex:1 1 12em}
 
-@media (prefers-reduced-motion:reduce){
+@media (prefers-reduced-motion:reduce){.radar .grow{transition:none}
   *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
   .map .pin-pulse{display:none}
 }
@@ -304,9 +310,14 @@ html[lang="en"] .intro h1{font-size:clamp(32px,3.6vw,52px)}
         </section>
         <section class="rsec">
           <h3 data-t="sizeTitle">이키가이 크기</h3>
-          <div class="size-row"><span class="size-fig" id="rSize"></span><span class="size-sub" data-t="sizeSub">네 빛이 모두 함께 닿는 부분</span></div>
-          <p class="note" id="rSizeNote"></p>
-          <p class="note" id="rSizeNext"></p>
+          <div class="size-wrap">
+            <figure class="radar" id="rRadar"></figure>
+            <div class="size-text">
+              <div class="size-row"><span class="size-fig" id="rSize"></span><span class="size-sub" data-t="sizeSub">네 빛이 덮는 넓이</span></div>
+              <p class="note" id="rSizeNote"></p>
+              <p class="note" id="rSizeNext"></p>
+            </div>
+          </div>
         </section>
         <section class="rsec">
           <h3 data-t="barsTitle">네 개의 빛</h3>
@@ -321,7 +332,7 @@ html[lang="en"] .intro h1{font-size:clamp(32px,3.6vw,52px)}
           <button class="btn primary" id="saveBtn" type="button" data-t="saveImg">이미지로 저장</button>
           <button class="btn ghost" id="againBtn" type="button" data-t="again">다시 하기</button>
         </div>
-        <p class="fine" data-t="fine">스스로를 돌아보기 위한 도구예요. 검증된 심리검사가 아니고, 같은 사람도 시기와 상황에 따라 결과가 달라져요. 모양은 내 가장 밝은 빛과 비교해서 함께 켜진 빛으로 정하고, 이키가이 크기는 가장 약한 빛으로 정해요. 네 원으로 그린 이키가이 그림은 서구에서 재해석된 모델이고, 일본어 生き甲斐(이키가이)는 본래 ‘살아가는 보람’이라는 더 넓은 말이에요.</p>
+        <p class="fine" data-t="fine">스스로를 돌아보기 위한 도구예요. 검증된 심리검사가 아니고, 같은 사람도 시기와 상황에 따라 결과가 달라져요. 모양은 60% 이상인 빛들로 정하고, 이키가이 크기는 네 빛으로 그린 마름모의 넓이로 정해요. 네 원으로 그린 이키가이 그림은 서구에서 재해석된 모델이고, 일본어 生き甲斐(이키가이)는 본래 ‘살아가는 보람’이라는 더 넓은 말이에요.</p>
       </article>
     </div>
   </section>
@@ -373,9 +384,9 @@ const STR = {
     offline:'인터넷에 연결되어 있지 않아요. 연결한 뒤 새로고침해 주세요.',
     unreachable:'응답 수집기에 연결하지 못했어요. ',
     notSavedNow:'지금은 응답이 저장되지 않아요. ',
-    noticeOff:'응답은 이름이나 연락처 없이 저장되고, 전체 통계를 내는 데에만 쓰여요.',
-    noticeOptional:'이름이나 연락처는 묻지 않아요. 닉네임은 원할 때만 적으면 되고, 응답은 전체 통계를 내는 데에만 쓰여요.',
-    noticeRequired:'이름이나 연락처는 묻지 않아요. 결과를 보낼 때 닉네임 하나만 적어 주세요. 응답은 전체 통계를 내는 데에만 쓰여요.',
+    noticeOff:'응답은 이름이나 연락처 없이 저장돼요. 결과는 전체 통계에 쓰이고, 이름 없는 점으로 모두의 자리 지도에 보일 수 있어요.',
+    noticeOptional:'이름이나 연락처는 묻지 않아요. 닉네임은 원할 때만 적으면 돼요. 결과는 전체 통계에 쓰이고, 네 점수가 모두의 자리 지도에 점으로(닉네임을 적었다면 함께) 보일 수 있어요.',
+    noticeRequired:'이름이나 연락처는 묻지 않아요. 결과를 보낼 때 닉네임 하나만 적어 주세요. 결과는 전체 통계에 쓰이고, 네 점수가 닉네임과 함께 모두의 자리 지도에 보일 수 있어요.',
     practice:'연습 모드예요. 응답을 어디에도 보내지 않고, 이 기기에서만 결과를 보여 줘요.',
     tSend:'결과 보내기', tSaved:'응답 저장', tCompare:'다른 참여자와 비교',
     sending:'응답을 보내고 있어요.',
@@ -395,7 +406,7 @@ const STR = {
     nickOpt:'선택', nickPh:'예: 별빛',
     nickHintOptional:'비워 두면 닉네임 없이 보내요. 닉네임은 모두의 자리 지도에서 다른 참여자와 진행자에게 보일 수 있어요.',
     nickHintRequired:'모두의 자리 지도에서 이 닉네임으로 보여요. 실명 대신 별명을 써도 돼요.',
-    seeMap:'모두의 자리 보기',
+    seeMap:'모두의 자리 보기', seeStats:'모두의 통계 보기',
     nickNeed:'닉네임을 적어 주세요.',
     sendBtn:'결과 보내기', resendBtn:'다시 보내기', sendingBtn:'보내는 중',
     outside:'네 사각형 바깥', mine:'내 자리',
@@ -404,16 +415,17 @@ const STR = {
     introDefault:'칸을 누르면 그 자리에 선 사람의 모습이 보여요.',
     endL:'아니다', endR:'그렇다', next:'다음', seeResult:'결과 보기',
     missing:n => `아직 답하지 않은 문장이 ${n}개 있어요.`,
-    where0:'네 빛 모두 아주 약해서, 아직 모양이 잡히지 않았어요. 지도에서는 네 사각형 바깥에 서 있어요.',
-    where15:'네 빛이 고르게 닿는 모양이에요. 네 사각형이 모두 겹치는 한가운데에 서 있어요.',
-    where1:a => `${qt(a)} 하나가 유난히 밝은 모양이에요. 그 사각형에만 들어가 있어요.`,
-    where2:(a, b, area) => `${qj(a, '과', '와')} ${qj(b, '이', '가')} 함께 밝은 모양이에요. 둘이 겹치는 ${qt(area)} 칸에 서 있어요.`,
-    whereOff:(a, b, cell) => `${qj(a, '과', '와')} ${qj(b, '이', '가')} 함께 밝은 모양이에요. 지도에서 서로 마주 보는 두 사각형이라 둘만 겹치는 칸이 없어서, 가장 가까운 ${qt(cell)} 칸에 표시했어요.`,
-    where3:(a, b, c, off) => `${qt(a)}, ${qt(b)}, ${qj(c, '이', '가')} 함께 밝은 칸에 서 있어요. ${qt(off)}만 상대적으로 어두워요.`,
-    sizeNote:w => `가장 약한 빛인 ${qj(w, '이', '가')} 크기를 정해요. 네 빛이 모두 같은 만큼 밝아야 그 크기 그대로 이키가이가 돼요.`,
-    sizeNext:(w, gap, to, second) => `${qj(w, '이', '가')} ${gap}%p 밝아지면, 이키가이도 ${to}%까지 커져요. 그다음은 ${qj(second, '과', '와')} 함께 키워야 해요.`,
-    sizeLevel:'네 빛 중 약한 쪽들이 거의 같아서, 함께 키워야 이키가이가 커져요.',
-    barsCap:t => `가장 밝은 빛의 75%(${t}%)를 넘으면 함께 켜진 빛으로 봐요. 점선이 그 기준이에요.`,
+    where0:'아직 60%에 닿은 빛이 없어서, 모양이 잡히지 않았어요. 지도에서는 네 사각형 바깥에 서 있어요.',
+    where15:'네 빛이 모두 60% 이상이에요. 네 사각형이 모두 겹치는 한가운데에 서 있어요.',
+    where1:a => `${qt(a)}만 60% 이상이에요. 그 사각형에만 들어가 있어요.`,
+    where2:(a, b, area) => `${qj(a, '과', '와')} ${qj(b, '이', '가')} 60% 이상이에요. 둘이 겹치는 ${qt(area)} 칸에 서 있어요.`,
+    whereOff:(a, b, cell) => `${qj(a, '과', '와')} ${qj(b, '이', '가')} 60% 이상이에요. 지도에서 서로 마주 보는 두 사각형이라 둘만 겹치는 칸이 없어서, 가장 가까운 ${qt(cell)} 칸에 표시했어요.`,
+    where3:(a, b, c, off) => `${qt(a)}, ${qt(b)}, ${qj(c, '이', '가')} 60% 이상이에요. ${qt(off)}만 아직 60%에 못 미쳐요.`,
+    sizeNote:'네 빛으로 그린 마름모가 꽉 찬 마름모의 몇 %를 덮는지가 이키가이 크기예요. 넷이 모두 밝아야 커지고, 어느 한쪽이 비면 그만큼 작아져요.',
+    sizeNext:(w, to) => `${qj(w, '이', '가')} 10%p 밝아지면 이키가이 크기가 ${to}%로 커져요. 양옆의 두 빛이 밝을수록, 한 빛을 키울 때 넓이가 더 많이 늘어요.`,
+    sizeFull:'네 빛이 모두 가득 차서 마름모가 꽉 찼어요.',
+    radarAria:(v, size) => `네 빛의 레이더: ${v}. 꽉 찬 마름모의 ${size}%를 덮어요.`,
+    barsCap:t => `${t}% 이상이면 켜진 빛으로 봐요. 점선이 그 기준이에요.`,
     resultInsp:'밝게 남은 칸일수록 지금의 나와 가까운 조합이에요. 칸을 눌러 그 자리에 선 사람과 비교해 보세요.',
     imgBrand:'이키가이 지도', imgSize:'이키가이 크기', imgMaking:'이미지 만드는 중', imgFail:'이미지를 만들지 못했어요',
     date:d => `${d.getFullYear()}.${p2(d.getMonth() + 1)}.${p2(d.getDate())}`,
@@ -430,9 +442,9 @@ const STR = {
     offline:'You\'re not connected to the internet. Connect and reload the page.',
     unreachable:'Couldn\'t reach the response collector. ',
     notSavedNow:'Responses aren\'t being saved right now. ',
-    noticeOff:'Responses are saved without names or contact details and are used only for group statistics.',
-    noticeOptional:'We don\'t ask for your name or contact details. A nickname is up to you, and responses are used only for group statistics.',
-    noticeRequired:'We don\'t ask for your name or contact details, only a nickname when you send your result. Responses are used only for group statistics.',
+    noticeOff:'Responses are saved without names or contact details. Your result counts toward group statistics and may appear as an unnamed dot on a shared map.',
+    noticeOptional:'We don\'t ask for your name or contact details. A nickname is up to you. Your result counts toward group statistics, and your four scores may appear as a dot on a shared map, with your nickname if you add one.',
+    noticeRequired:'We don\'t ask for your name or contact details, only a nickname when you send your result. Your result counts toward group statistics, and your four scores may appear with your nickname on a shared map.',
     practice:'Practice mode. Your answers aren\'t sent anywhere, and your result is shown on this device only.',
     tSend:'Send your result', tSaved:'Your response', tCompare:'Compared with others',
     sending:'Sending your response…',
@@ -452,7 +464,7 @@ const STR = {
     nickOpt:'optional', nickPh:'e.g. Stardust',
     nickHintOptional:'Leave it blank to send without one. Your nickname may be shown to other participants and the organizer on the shared map.',
     nickHintRequired:'This is how you\'ll appear on the shared map. A made-up name is fine.',
-    seeMap:'See everyone on the map',
+    seeMap:'See everyone on the map', seeStats:'See the room\'s stats',
     nickNeed:'Please enter a nickname.',
     sendBtn:'Send my result', resendBtn:'Send again', sendingBtn:'Sending',
     outside:'Outside all four squares', mine:'Your place',
@@ -461,16 +473,17 @@ const STR = {
     introDefault:'Tap a cell to see the kind of person who stands there.',
     endL:'Disagree', endR:'Agree', next:'Next', seeResult:'See result',
     missing:n => n === 1 ? '1 statement still needs an answer.' : `${n} statements still need an answer.`,
-    where0:'All four lights are very dim, so no shape has formed yet. On the map you stand outside all four squares.',
-    where15:'All four lights reach you evenly. You stand in the middle, where all four squares overlap.',
-    where1:a => `${nq(a)} shines especially bright. You're inside that square only.`,
-    where2:(a, b, area) => `${nq(a)} and ${nq(b)} are bright together. You stand in the ${area} cell, where they overlap.`,
-    whereOff:(a, b, cell) => `${nq(a)} and ${nq(b)} are bright together. They face each other on the map and have no cell of their own, so you're shown in the nearest one, ${cell}.`,
-    where3:(a, b, c, off) => `${nq(a)}, ${nq(b)} and ${nq(c)} are bright together. Only ${nq(off)} is relatively dim.`,
-    sizeNote:w => `Your weakest light, ${nq(w)}, sets the size. Only the part all four lights reach counts as ikigai.`,
-    sizeNext:(w, gap, to, second) => `If ${nq(w)} gets ${gap} points brighter, your ikigai grows to ${to}%. After that, it grows only together with ${nq(second)}.`,
-    sizeLevel:'Your weaker lights are almost level, so they need to grow together for your ikigai to grow.',
-    barsCap:t => `A light counts as on when it reaches 75% of your brightest light (${t}%). The dashed line marks that point.`,
+    where0:'No light has reached 60% yet, so no shape has formed. On the map you stand outside all four squares.',
+    where15:'All four lights are at 60% or more. You stand in the middle, where all four squares overlap.',
+    where1:a => `Only ${nq(a)} is at 60% or more. You're inside that square only.`,
+    where2:(a, b, area) => `${nq(a)} and ${nq(b)} are at 60% or more. You stand in the ${area} cell, where they overlap.`,
+    whereOff:(a, b, cell) => `${nq(a)} and ${nq(b)} are at 60% or more. They face each other on the map and have no cell of their own, so you're shown in the nearest one, ${cell}.`,
+    where3:(a, b, c, off) => `${nq(a)}, ${nq(b)} and ${nq(c)} are at 60% or more. Only ${nq(off)} is still below.`,
+    sizeNote:'Your ikigai size is how much of the full diamond your four lights cover. It grows when all four are bright, and shrinks wherever one is empty.',
+    sizeNext:(w, to) => `If ${nq(w)} rises by 10 points, your ikigai size grows to ${to}%. A light adds the most area when the two lights beside it are bright.`,
+    sizeFull:'All four lights are full, so the diamond is complete.',
+    radarAria:(v, size) => `Radar of the four lights: ${v}. It covers ${size}% of the full diamond.`,
+    barsCap:t => `A light counts as on at ${t}% or more. The dashed line marks that point.`,
     resultInsp:'The brighter a cell stays, the closer it is to you. Tap a cell to compare yourself with the person who stands there.',
     imgBrand:'Ikigai Map', imgSize:'Ikigai size', imgMaking:'Making the image…', imgFail:'Couldn\'t make the image',
     date:d => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`,
@@ -486,9 +499,9 @@ const STATIC_EN = {
   guide:'Answer with the work you spend the most time on in mind (your job, research, studies, business and so on). Go by who you are now, not who you want to be. There\'s no need to think long.',
   prev:'Back',
   nick:'Nickname', retry:'Send again',
-  sizeTitle:'Ikigai size', sizeSub:'The part all four lights reach', barsTitle:'The four lights', tipsTitle:'Things to try',
+  sizeTitle:'Ikigai size', sizeSub:'The area your four lights cover', barsTitle:'The four lights', tipsTitle:'Things to try',
   saveImg:'Save as image', again:'Take it again',
-  fine:'This is a tool for reflection, not a validated psychological test, and the same person can get different results at different times. Your shape is the set of lights that are on compared with your brightest light, and your ikigai size is set by your weakest light. The four-circle ikigai diagram is a Western reinterpretation; the Japanese word 生き甲斐 (ikigai) originally has the broader meaning of “a reason for being”.',
+  fine:'This is a tool for reflection, not a validated psychological test, and the same person can get different results at different times. Your shape is the set of lights at 60% or more, and your ikigai size is the area of the diamond your four lights draw. The four-circle ikigai diagram is a Western reinterpretation; the Japanese word 生き甲斐 (ikigai) originally has the broader meaning of “a reason for being”.',
   overlayAria:'Result image', shotAlt:'Ikigai Map result image',
   shotHint:'If saving doesn\'t work, press and hold the image or right-click it to save it.', dl:'Download PNG', close:'Close',
 };
@@ -681,7 +694,7 @@ async function loadCompare(res) {
   catch (e) { saveBox(S.tCompare, note(S.statsLater)); }
 }
 // the shared map opens in a new tab; it finds your own dot from what this browser remembers
-const mapLink = on => on ? `<p class="note maplink"><a class="btn ghost small" href="map.html?lang=${L}" target="_blank" rel="noopener">${S.seeMap}</a></p>` : '';
+const mapLink = on => on ? `<p class="note maplink"><a class="btn ghost small" href="map.html?lang=${L}" target="_blank" rel="noopener">${S.seeMap}</a><a class="btn ghost small" href="map.html?lang=${L}&amp;view=stats" target="_blank" rel="noopener">${S.seeStats}</a></p>` : '';
 function renderCompare(res, sm, mapOn) {
   const sent = S.sent(esc(st.sentNick || ''));
   if (!sm || API.cfg.publicStats === false) return saveBox(S.tSaved, note(`${sent} ${S.thanks}`));
@@ -802,17 +815,23 @@ function renderResult(r, animate) {
   $('#rName').innerHTML = r.shape === 0 ? esc(T.name) : `<span class="word">${esc(r.word)}</span> ${esc(T.name)}`;
   $('#rWhere').textContent = whereSentence(r);
   $('#rTag').textContent = T.tag;
-  $('#rDesc').textContent = r.shape === 15 && r.glow < 0.55 ? T.descDim : T.desc;
+  $('#rDesc').textContent = r.shape === 15 && r.glow < 0.7 ? T.descDim : T.desc;
 
-  // ikigai size
-  const weak = r.weakest, second = r.second;
+  // ikigai size: the radar's area. The growth hint names the light whose next 10 points add the most area
+  // (the brighter its two neighbours, the more), choosing the dimmer one when two tie.
+  const weak = r.weakest;
   $('#rSize').textContent = pct(r.core) + '%';
-  $('#rSizeNote').textContent = S.sizeNote(weak.name);
-  const gap = r.s[second.k] - r.s[weak.k];
-  $('#rSizeNext').textContent = gap >= 0.02 ? S.sizeNext(weak.name, pct(gap), pct(r.s[second.k]), second.name) : S.sizeLevel;
+  $('#rSizeNote').textContent = S.sizeNote;
+  const grow = EL.map(e => ({ e, to:I.sizeIf(r.s, e.k, 0.1) })).sort((a, b) => (b.to - a.to) || (r.s[a.e.k] - r.s[b.e.k]))[0];
+  $('#rSizeNext').textContent = grow.to - r.core < 0.005 ? S.sizeFull : S.sizeNext(grow.e.name, pct(grow.to));
+  const fig = $('#rRadar');
+  fig.innerHTML = I.buildRadar('res', { layers:[{ s:r.s, kind:'me', grow:true, alpha:0.18 }],
+    lines:Object.fromEntries(EL.map(e => [e.k, [{ t:pct(r.s[e.k]) + '%', strong:true }]])),
+    aria:S.radarAria(EL.map(e => `${e.short} ${pct(r.s[e.k])}%`).join(', '), pct(r.core)) });
+  if (animate && !I.reduceMotion) { fig.classList.add('pre'); requestAnimationFrame(() => requestAnimationFrame(() => fig.classList.remove('pre'))); }
 
   // bars
-  const mx = Math.max(r.s.L, r.s.G, r.s.N, r.s.P), thr = I.RHO * mx;
+  const thr = I.ON;
   $('#rBarsCap').textContent = S.barsCap(pct(thr));
   $('#rBars').innerHTML = EL.map(e => {
     const v = pct(r.s[e.k]), on = !!(r.shape & e.bit);
